@@ -5,19 +5,15 @@ import (
 	"github.com/gosuri/uilive"
 	"os"
 	"os/exec"
+	"r/flagset"
 	"r/top"
 	"runtime"
-	"strconv"
 	"time"
 )
 
 func main() {
-	var limit int
-	if len(os.Args) > 1 {
-		limit, _ = strconv.Atoi(os.Args[1])
-	}
-	if limit == 0 {
-		limit = 10
+	if !flagset.Init(BuildID) {
+		return
 	}
 
 	clear()
@@ -27,10 +23,10 @@ func main() {
 
 	canvas := uilive.New()
 	canvas.Start()
-	t := time.NewTicker(time.Millisecond * 1000)
-	_, _ = fmt.Fprintf(canvas, "%s", top.Call(limit))
+	t := time.NewTicker(time.Millisecond * 2000)
+	_, _ = fmt.Fprintf(canvas, "%s", top.Call(*flagset.Limit))
 	for range t.C {
-		_, _ = fmt.Fprintf(canvas, "%s", top.Call(limit))
+		_, _ = fmt.Fprintf(canvas, "%s", top.Call(*flagset.Limit))
 	}
 	canvas.Stop()
 }
@@ -40,3 +36,5 @@ func clear() {
 	cmd.Stdout = os.Stdout
 	_ = cmd.Run()
 }
+
+var BuildID = "0"
