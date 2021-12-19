@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/gosuri/uilive"
 	"os"
 	"os/exec"
 	"r/flagset"
+	"r/owspace"
 	"r/top"
 	"runtime"
 	"time"
@@ -18,17 +18,15 @@ func main() {
 
 	clear()
 	fmt.Printf(" Num count  mem   CPU%%  Name  (Total: %d%%)\n"+
-		"------------------------------------------------------------\n",
-		runtime.NumCPU()*100)
+		"------------------------------------------------------------\n", runtime.NumCPU()*100)
 
-	canvas := uilive.New()
-	canvas.Start()
-	t := time.NewTicker(time.Millisecond * 2000)
-	_, _ = fmt.Fprintf(canvas, "%s", top.Call(*flagset.Limit))
-	for range t.C {
-		_, _ = fmt.Fprintf(canvas, "%s", top.Call(*flagset.Limit))
-	}
-	canvas.Stop()
+	owspace.New(func(w *owspace.Writer) {
+		t := time.NewTicker(time.Millisecond * 2000)
+		w.Write(top.Call(*flagset.Limit))
+		for range t.C {
+			w.Write(top.Call(*flagset.Limit))
+		}
+	})
 }
 
 func clear() {

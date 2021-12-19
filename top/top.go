@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-func Call(limit int) []byte {
+func Call(limit int) string {
 	limit = limit - 1
 
 	// 读取进程列表
@@ -38,7 +38,7 @@ func Call(limit int) []byte {
 			fmt.Sprintf("%.1f", proc.CPUPercent),
 			proc.Name))
 	}
-	return page.Bytes()
+	return page.String()
 }
 
 func combineSimilarItem(processes *[]scanner.Process) {
