@@ -17,9 +17,7 @@ func Processes() []Process {
 		panic(processErr)
 	}
 	for _, proc := range processes {
-		var cmdline string
-		var ppid int32
-		if ignore(proc, &ppid, &cmdline) {
+		if ignore(proc) {
 			continue
 		}
 		name, _ := proc.Name()
@@ -38,30 +36,10 @@ func Processes() []Process {
 	return elements
 }
 
-func ignore(proc *process.Process, ppidCp *int32, cmdlineCp *string) (_ bool) {
+func ignore(proc *process.Process) (_ bool) {
 	cmdline, _ := proc.Cmdline()
 	if cmdline == "" {
 		return true
 	}
-	times, _ := proc.Times()
-	if times == nil {
-		return true
-	}
-	if times.Total() == 0 {
-		return true
-	}
-	ppid, _ := proc.Ppid()
-	if ppid == 0 {
-		return true
-	}
-	prov, _ := process.NewProcess(ppid)
-	if prov != nil {
-		name, _ := prov.Name()
-		if name == "systemd" {
-			return true
-		}
-	}
-	*ppidCp = ppid
-	*cmdlineCp = cmdline
 	return
 }
