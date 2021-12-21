@@ -14,6 +14,9 @@ func Call(limit int) string {
 
 	// 读取进程列表
 	processes := scanner.Processes()
+	if processes == nil {
+		return "nil"
+	}
 
 	// 合并同类项
 	combineSimilarItem(&processes)
@@ -34,26 +37,26 @@ func Call(limit int) string {
 
 func combineSimilarItem(processes *[]scanner.Process) {
 	sets := make(map[string]scanner.Process)
-	for _, elem := range *processes {
-		if elem.Process.Pid == PIDSelf {
-			continue
+	for _, proc := range *processes {
+		if proc.Process != nil {
+			if proc.Process.Pid == ProcessId {
+				continue
+			}
 		}
-		rename(&elem.Name)
-		if proc, has := sets[elem.Name]; has {
-			proc.Count++
+		rename(&proc.Name)
+		if elem, has := sets[proc.Name]; has {
+			proc.Count += elem.Count
 			proc.CPUPercent += elem.CPUPercent
 			proc.MemoryBytes += elem.MemoryBytes
-			sets[elem.Name] = proc
+			sets[proc.Name] = proc
 		} else {
-			sets[elem.Name] = elem
+			sets[proc.Name] = proc
 		}
 	}
 	*processes = nil
 	for _, proc := range sets {
 		if proc.CPUPercent < 0.1 {
 			if strings.HasSuffix(proc.Name, ".sh") ||
-				proc.Name == "gnome-shell" ||
-				proc.Name == "snapd" ||
 				proc.Name == "PM2" ||
 				proc.Name == "dockerd" ||
 				proc.Name == "sshd" {
@@ -66,7 +69,12 @@ func combineSimilarItem(processes *[]scanner.Process) {
 
 func rename(name *string) {
 	switch {
-	case strings.HasPrefix(*name, "systemd"):
+
+	case strings.HasPrefix(*name, "upstart"):
+		*name = "upstart"
+	case strings.HasPrefix(*name, "indicator"):
+		*name = "indicator"
+	case strings.HasPrefix(*name, "systemd"), *name == "(sd-pam)":
 		*name = "systemd"
 	case strings.HasPrefix(*name, "ibus"):
 		*name = "ibus"
@@ -76,32 +84,45 @@ func rename(name *string) {
 		*name = "cups"
 	case strings.HasPrefix(*name, "xdg"):
 		*name = "xdg"
+	case strings.HasPrefix(*name, "fcitx"):
+		*name = "fcitx"
 	case strings.HasPrefix(*name, "evolution"):
 		*name = "evolution"
 	case strings.HasPrefix(*name, "pipewire"):
 		*name = "pipewire"
+	case strings.HasPrefix(*name, "unity"):
+		*name = "unity-tools"
 	case strings.HasPrefix(*name, "gnome"):
-		*name = "gnome-shell"
+		switch *name {
+		case "gnome-terminal.real":
+			*name = "terminal"
+		case "gnome-disks":
+			*name = "disks"
+		default:
+			*name = "gnome-shell"
+		}
 	case strings.HasPrefix(*name, "gvfs"):
 		*name = "gvfs"
-	case strings.HasPrefix(*name, "gsd"):
-		*name = "gsd"
 	case strings.HasPrefix(*name, "gdm"):
 		*name = "gdm"
+	case strings.HasPrefix(*name, "gsd"):
+		*name = "gsd"
 	case strings.HasPrefix(*name, "goa"):
 		*name = "goa"
 	case strings.HasPrefix(*name, "at-spi"):
 		*name = "at-spi"
-	case strings.HasPrefix(*name, "VBox"):
-		*name = "VirtualBoxVM"
 	case strings.HasPrefix(*name, "chrome"):
 		*name = "chrome"
 	case strings.HasPrefix(*name, "sysproxy-cmd"):
 		*name = "lantern"
 	case strings.HasPrefix(*name, "PM2"):
 		*name = "PM2"
+	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
+		*name = "VirtualBox"
 
-		// python3
+		// HasSuffix
+	case strings.HasSuffix(*name, "gjs"):
+		*name = "gjs"
 	case strings.HasSuffix(*name, "python3"):
 		*name = "python3"
 	}
@@ -112,16 +133,19 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 		if i > limit {
 			break
 		}
+
 		cpu := fmt.Sprintf("%.1f", proc.CPUPercent)
 		buf := fmt.Sprintf("%3d)  %2d  %7s  %32s  %6s  %s",
-			i+1,                                   // Num
+			i,                                     // Num
 			proc.Count,                            // count
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
-			descriptionMatch[strings.ToLower(proc.Name)],
+			descriptionMatch(strings.ToLower(proc.Name)),
 		)
-		if cpu == "0.0" {
+		if proc.Name == scanner.StatisticsTag {
+			page.WriteString(strings.Join([]string{"\u001B[0;37;48m", buf, "\u001B[0m\n"}, ""))
+		} else if cpu == "0.0" {
 			page.WriteString(strings.Join([]string{"\u001B[0;34;48m", buf, "\u001B[0m\n"}, ""))
 		} else if cpu == "0.1" {
 			page.WriteString(strings.Join([]string{"\u001B[0;36;48m", buf, "\u001B[0m\n"}, ""))
@@ -158,4 +182,4 @@ const (
 	_GB = 1024 * 1024 * 1024
 )
 
-var PIDSelf = int32(os.Getpid())
+var ProcessId = int32(os.Getpid())

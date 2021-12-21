@@ -18,7 +18,7 @@ func main() {
 
 	clear()
 	fmt.Printf(" Num Count  Memory                             Name    CPU%%  / Core*%d\n"+
-		"----------------------------------------------------------------------\n", runtime.NumCPU())
+		"--------------------------------------------------------------------------------------\n", runtime.NumCPU())
 
 	owspace.New(func(w *owspace.Writer) {
 		t := time.NewTicker(time.Millisecond * 2000)
