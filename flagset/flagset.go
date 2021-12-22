@@ -14,6 +14,7 @@ const (
 var fs = flag.NewFlagSet(binary, flag.ExitOnError)
 var (
 	__version = fs.Bool("version", false, "show version information")
+	Java      = fs.Bool("java", false, "Java process list")
 	Limit     = fs.Int("l", 10, "limit")
 )
 

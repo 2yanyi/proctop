@@ -42,7 +42,9 @@ func ignore(proc *process.Process) (elem Process, _ bool) {
 	elem.Name, _ = proc.Name()
 	elem.CPUPercent, _ = proc.CPUPercent()
 	MemoryInfo, _ := proc.MemoryInfo()
-	elem.MemoryBytes = MemoryInfo.RSS
+	if MemoryInfo != nil {
+		elem.MemoryBytes = MemoryInfo.RSS
+	}
 	elem.Count = 1
 	return
 }

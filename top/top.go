@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"r/flagset"
 	"r/scanner"
 	"sort"
 	"strings"
@@ -43,7 +44,7 @@ func combineSimilarItem(processes *[]scanner.Process) {
 				continue
 			}
 		}
-		rename(&proc.Name)
+		rename(&proc.Name, &proc.Commandline)
 		if elem, has := sets[proc.Name]; has {
 			proc.Count += elem.Count
 			proc.CPUPercent += elem.CPUPercent
@@ -67,9 +68,83 @@ func combineSimilarItem(processes *[]scanner.Process) {
 	}
 }
 
-func rename(name *string) {
-	switch {
+func renameJava(name, commandline *string) {
 
+	// Java: JetBrains
+	if strings.Contains(*commandline, "-Didea.vendor.name=JetBrains") {
+		for i, value := range strings.Split(*commandline, "-Didea.platform.prefix=") {
+			if i == 0 {
+				continue
+			}
+			*name = ""
+			for _, char := range value {
+				if char == ' ' {
+					break
+				}
+				*name += string(char)
+			}
+			*name = javaTag + strings.ToLower(*name)
+		}
+		return
+	}
+
+	// Java: hadoop
+	if strings.Contains(*commandline, "-Dhadoop.log") {
+		*name = javaTag + "hadoop"
+		return
+	}
+
+	// Java: hbase
+	if strings.Contains(*commandline, "-Dhbase.log") {
+		*name = javaTag + "hbase"
+		return
+	}
+
+	// Java: zookeeper
+	if strings.Contains(*commandline, "-Dzookeeper.log") {
+		*name = javaTag + "zookeeper"
+		return
+	}
+
+	// Java: kafka
+	if strings.Contains(*commandline, "-Dkafka.log") {
+		*name = javaTag + "kafka"
+		return
+	}
+
+	// java: jar
+	if strings.Count(*commandline, ".jar") != 0 {
+		values := strings.Split(*commandline, ".jar")[0]
+		value := values[strings.LastIndex(values, "/")+1:]
+		*name = javaTag + value + ".jar"
+		return
+	}
+
+	values := strings.Fields(strings.ReplaceAll(*commandline, "=", " "))
+	tag := values[len(values)-2]
+	value := ""
+	if tag[0] == '-' {
+		value = values[len(values)-3]
+		if value[0] == '/' {
+			value = values[len(values)-1]
+		}
+	} else {
+		value = values[len(values)-1]
+	}
+	*name = javaTag + value
+}
+
+// 多个进程合并
+func rename(name, commandline *string) {
+
+	if *flagset.Java {
+		if *name == "java" {
+			renameJava(name, commandline)
+			return
+		}
+	}
+
+	switch {
 	case strings.HasPrefix(*name, "upstart"):
 		*name = "upstart"
 	case strings.HasPrefix(*name, "indicator"):
@@ -92,6 +167,8 @@ func rename(name *string) {
 		*name = "pipewire"
 	case strings.HasPrefix(*name, "unity"):
 		*name = "unity-tools"
+
+		// GNOME
 	case strings.HasPrefix(*name, "gnome"):
 		switch *name {
 		case "gnome-terminal.real":
@@ -101,6 +178,8 @@ func rename(name *string) {
 		default:
 			*name = "gnome-shell"
 		}
+	case strings.HasPrefix(*name, "tracker"):
+		*name = "tracker"
 	case strings.HasPrefix(*name, "gvfs"):
 		*name = "gvfs"
 	case strings.HasPrefix(*name, "gdm"):
@@ -111,20 +190,34 @@ func rename(name *string) {
 		*name = "goa"
 	case strings.HasPrefix(*name, "at-spi"):
 		*name = "at-spi"
+
+		// Applications
 	case strings.HasPrefix(*name, "chrome"):
 		*name = "chrome"
 	case strings.HasPrefix(*name, "sysproxy-cmd"):
 		*name = "lantern"
+	case strings.HasPrefix(*name, "docker"):
+		*name = "docker"
 	case strings.HasPrefix(*name, "PM2"):
 		*name = "PM2"
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
 		*name = "VirtualBox"
+	case strings.HasPrefix(*name, "clickhouse"):
+		*name = "clickhouse"
+	case strings.HasPrefix(*name, "mongo"):
+		*name = "mongodb"
+	case strings.HasPrefix(*name, "mysql"):
+		*name = "mysql"
+	case strings.HasPrefix(*name, "redis"):
+		*name = "redis"
+	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
+		*name = "virt-manager"
 
 		// HasSuffix
 	case strings.HasSuffix(*name, "gjs"):
 		*name = "gjs"
-	case strings.HasSuffix(*name, "python3"):
-		*name = "python3"
+	case strings.HasSuffix(*name, "python3"), strings.HasPrefix(*name, "python"):
+		*name = "python"
 	}
 }
 
@@ -141,7 +234,7 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
-			descriptionMatch(strings.ToLower(proc.Name)),
+			descriptionMatch(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
 			page.WriteString(strings.Join([]string{"\u001B[0;37;48m", buf, "\u001B[0m\n"}, ""))
@@ -169,12 +262,17 @@ func sizeFormat(bytes float64) (_ string) {
 	return
 }
 
-func nameFormat(s string) (_ string) {
+func nameFormat(s string) string {
+	if strings.HasPrefix(s, javaTag) {
+		return "                            \u001B[0;32;48m" + s
+	}
 	if len(s) > 32 {
-		return s[:30] + ".."
+		s = s[:30] + ".."
 	}
 	return s
 }
+
+const javaTag = "java:"
 
 const (
 	_KB = 1024

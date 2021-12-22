@@ -10,6 +10,9 @@ func Test(t *testing.T) {
 	output := ""
 	processes := Processes()
 	for i, proc := range processes {
+		if proc.Process == nil {
+			continue
+		}
 		cmdline, _ := proc.Process.Cmdline()
 		ppid, _ := proc.Process.Ppid()
 		output += fmt.Sprintf("%3d) %5d %5d %32s CMD %s\n",
