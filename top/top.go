@@ -11,7 +11,6 @@ import (
 )
 
 func Call(limit int) string {
-	limit = limit - 1
 
 	// 读取进程列表
 	processes := scanner.Processes()
@@ -57,10 +56,7 @@ func combineSimilarItem(processes *[]scanner.Process) {
 	*processes = nil
 	for _, proc := range sets {
 		if proc.CPUPercent < 0.1 {
-			if strings.HasSuffix(proc.Name, ".sh") ||
-				proc.Name == "PM2" ||
-				proc.Name == "dockerd" ||
-				proc.Name == "sshd" {
+			if strings.HasSuffix(proc.Name, ".sh") || proc.Name == "sshd" {
 				proc.CPUPercent = 0.1
 			}
 		}
@@ -113,10 +109,14 @@ func renameJava(name, commandline *string) {
 	}
 
 	// java: jar
-	if strings.Count(*commandline, ".jar") != 0 {
+	jars := strings.Count(*commandline, ".jar")
+	if jars == 1 {
 		values := strings.Split(*commandline, ".jar")[0]
 		value := values[strings.LastIndex(values, "/")+1:]
 		*name = javaTag + value + ".jar"
+		return
+	} else if jars > 1 {
+		*name = *commandline
 		return
 	}
 
@@ -171,7 +171,7 @@ func rename(name, commandline *string) {
 		// GNOME
 	case strings.HasPrefix(*name, "gnome"):
 		switch *name {
-		case "gnome-terminal.real":
+		case "gnome-terminal", "gnome-terminal.real":
 			*name = "terminal"
 		case "gnome-disks":
 			*name = "disks"
@@ -201,7 +201,9 @@ func rename(name, commandline *string) {
 	case strings.HasPrefix(*name, "PM2"):
 		*name = "PM2"
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
-		*name = "VirtualBox"
+		if *name != "VBoxClient" {
+			*name = "VirtualBoxVM"
+		}
 	case strings.HasPrefix(*name, "clickhouse"):
 		*name = "clickhouse"
 	case strings.HasPrefix(*name, "mongo"):

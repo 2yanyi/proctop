@@ -11,7 +11,7 @@ var cpuMax = float64(runtime.NumCPU() * 100)
 
 func descriptionMatch(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
-		return fmt.Sprintf("%.2f%%", *cpu/cpuMax)
+		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
 	}
 	if coreutils[s] {
 		return "\u001B[0;37;48mcoreutils\u001B[0m"
@@ -70,6 +70,7 @@ var components = map[string]string{
 	"hidpi-daemon":   "https://github.com/pop-os/hidpi-daemon",
 	"cron":           "https://github.com/cronie-crond",
 	"bluetoothd":     "https://github.com/bluez",
+	"obexd":          "https://github.com/heinervdm/obexd",
 	"packagekitd":    "https://github.com/packagekit",
 	"ibus":           "https://github.com/ibus",
 	"fusermount":     "https://github.com/libfuse",
@@ -102,16 +103,16 @@ var components = map[string]string{
 	"rinetd":                  "https://github.com/samhocevar/rinetd",
 
 	// Applications
-	"virtualbox": "https://virtualbox.org",
-	"chrome":     "https://google.com/chrome",
-	"firefox":    "https://firefox.com",
-	"code":       "https://code.visualstudio.com",
-	"lantern":    "https://lantern.io",
-	"dbeaver":    "https://dbeaver.io",
-	"insomnia":   "https://insomnia.rest",
-	"blender":    "https://blender.org",
-	"kazam":      "https://launchpad.net/kazam",
-	"vlc":        "https://videolan.org",
+	"virtualboxvm": "https://virtualbox.org",
+	"chrome":       "https://google.com/chrome",
+	"firefox":      "https://firefox.com",
+	"code":         "https://code.visualstudio.com",
+	"lantern":      "https://lantern.io",
+	"dbeaver":      "https://dbeaver.io",
+	"insomnia":     "https://insomnia.rest",
+	"blender":      "https://blender.org",
+	"kazam":        "https://launchpad.net/kazam",
+	"vlc":          "https://videolan.org",
 
 	// Server Components
 	"sshd":         "https://openssh.com",

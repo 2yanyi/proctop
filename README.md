@@ -1,5 +1,10 @@
 # proctop
-command line tool, similar to top
+
+一个清晰直观又漂亮的命令行进程监视器，更有 Java 增强功能。
+
+<br>
+
+# 该页面等待完善
 
 <br>
 
