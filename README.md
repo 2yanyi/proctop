@@ -4,11 +4,12 @@
 
 <br>
 
-# 动画演示 GIF 占位...
+<img src="demo.png">
 
 <br>
+<br>
 
-## Installation
+## Install script
 
 ```sh
 pkg='elf.x64-proctop-v0.1.4.tar.gz'; \
@@ -22,5 +23,16 @@ rm -f $pkg
 ## Quick Start
 
 ```sh
-proctop -l 55 --java
+$ proctop --help
+Usage of proctop:
+  -java
+    	Java process list
+  -l int
+    	limit (default 10)
+  -version
+    	show version information
+```
+
+```sh
+proctop -l 55
 ```

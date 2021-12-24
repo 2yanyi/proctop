@@ -87,6 +87,7 @@ var components = map[string]string{
 	"boxes":        "https://wiki.gnome.org/Apps/Boxes",
 	"dconf-editor": "https://wiki.gnome.org/Apps/DconfEditor",
 	"evince":       "https://wiki.gnome.org/Apps/Evince",
+	"totem":        "https://wiki.gnome.org/Apps/Videos",
 
 	// System Components Source
 	"system76-power": "https://github.com/pop-os/system76-power",
