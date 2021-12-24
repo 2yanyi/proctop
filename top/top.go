@@ -237,6 +237,7 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
 			descriptionMatch(strings.ToLower(proc.Name), &proc.CPUPercent),
+			//descriptionRead(proc.Name),
 		)
 		if proc.Name == scanner.StatisticsTag {
 			page.WriteString(strings.Join([]string{"\u001B[0;37;48m", buf, "\u001B[0m\n"}, ""))

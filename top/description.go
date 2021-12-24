@@ -2,12 +2,36 @@ package top
 
 import (
 	"fmt"
+	"os/exec"
 	"r/scanner"
 	"runtime"
 	"strings"
 )
 
 var cpuMax = float64(runtime.NumCPU() * 100)
+var readCache = make(map[string]string)
+
+func descriptionRead(s string) (_ string) {
+	switch s {
+	default:
+		//return
+	case "systemd", "ibus", "avahi-daemon":
+	}
+	if text, has := readCache[s]; has {
+		return text
+	}
+	readCache[s] = ""
+	go func() {
+		text, _ := exec.Command("apt", "show", s).Output()
+		for _, line := range strings.Split(string(text), "\n") {
+			if strings.HasPrefix(line, "Description:") {
+				readCache[s] = strings.TrimSpace(line[len("Description:"):])
+				return
+			}
+		}
+	}()
+	return
+}
 
 func descriptionMatch(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
@@ -101,6 +125,7 @@ var components = map[string]string{
 	"unity-tools":             "https://unityx.org",
 	"upstart":                 "https://upstart.ubuntu.com",
 	"rinetd":                  "https://github.com/samhocevar/rinetd",
+	"notify-osd":              "https://launchpad.net/notify-osd",
 
 	// Applications
 	"virtualboxvm": "https://virtualbox.org",
