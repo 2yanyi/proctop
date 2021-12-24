@@ -7,7 +7,6 @@
 <img src="demo.png">
 
 <br>
-<br>
 
 ## Install script
 
