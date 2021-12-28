@@ -35,11 +35,3 @@ Usage of proctop:
 ```sh
 proctop -l 55
 ```
-
-## Linux OS
-
-kernel
-coreutils
-util-linux
-systemd
-desktop
