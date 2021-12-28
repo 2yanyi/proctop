@@ -6,6 +6,8 @@ import (
 	"os"
 	"r/flagset"
 	"r/scanner"
+	"r/top/homepage"
+	"runtime"
 	"sort"
 	"strings"
 )
@@ -43,7 +45,9 @@ func combineSimilarItem(processes *[]scanner.Process) {
 				continue
 			}
 		}
-		rename(&proc.Name, &proc.Commandline)
+		if runtime.GOOS == "linux" {
+			rename(&proc.Name, &proc.Commandline)
+		}
 		if elem, has := sets[proc.Name]; has {
 			proc.Count += elem.Count
 			proc.CPUPercent += elem.CPUPercent
@@ -236,8 +240,7 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
-			descriptionMatch(strings.ToLower(proc.Name), &proc.CPUPercent),
-			//descriptionRead(proc.Name),
+			homepage.WebsiteMatch(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
 			page.WriteString(strings.Join([]string{"\u001B[0;37;48m", buf, "\u001B[0m\n"}, ""))

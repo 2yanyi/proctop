@@ -2,7 +2,7 @@ package scanner
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -23,5 +23,5 @@ func Test(t *testing.T) {
 			cmdline,
 		)
 	}
-	_ = ioutil.WriteFile("process.txt", []byte(output), 0666)
+	_ = os.WriteFile("process.txt", []byte(output), 0666)
 }

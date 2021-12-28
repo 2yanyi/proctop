@@ -17,7 +17,9 @@ func main() {
 		return
 	}
 
-	clear()
+	if runtime.GOOS == "linux" {
+		clear()
+	}
 	OSName, OSVersion := OSRelease()
 	fmt.Printf(" Num Count  Memory                             Name    CPU%%  / Core*%d  %s %s\n"+
 		"--------------------------------------------------------------------------------------\n",

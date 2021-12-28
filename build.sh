@@ -21,6 +21,7 @@ if [[ ${static} == "static" ]]; then
 
   # 静态编译
   go build -ldflags '-linkmode "external" -extldflags "-static" -X main.BuildID='${version} -o bin/proctop main.go
+  GOOS=windows go build -ldflags '-X main.BuildID='${version} -o bin/proctop.exe main.go
 
 else
 
