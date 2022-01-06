@@ -46,6 +46,10 @@ func combineSimilarItem(processes *[]scanner.Process) {
 			}
 		}
 		if runtime.GOOS == "linux" {
+			switch proc.Name {
+			case "sudo", "su", "sh", "bash":
+				continue
+			}
 			rename(&proc.Name, &proc.Commandline)
 		}
 		if elem, has := sets[proc.Name]; has {
@@ -60,7 +64,7 @@ func combineSimilarItem(processes *[]scanner.Process) {
 	*processes = nil
 	for _, proc := range sets {
 		if proc.CPUPercent < 0.1 {
-			if strings.HasSuffix(proc.Name, ".sh") || proc.Name == "sshd" {
+			if proc.Name == "sshd" {
 				proc.CPUPercent = 0.1
 			}
 		}
@@ -149,16 +153,18 @@ func rename(name, commandline *string) {
 	}
 
 	switch {
+
+	// System
 	case strings.HasPrefix(*name, "upstart"):
 		*name = "upstart"
 	case strings.HasPrefix(*name, "indicator"):
 		*name = "indicator"
 	case strings.HasPrefix(*name, "systemd"), *name == "(sd-pam)":
 		*name = "systemd"
-	case strings.HasPrefix(*name, "ibus"):
-		*name = "ibus"
 	case strings.HasPrefix(*name, "dbus"):
 		*name = "dbus"
+	case strings.HasPrefix(*name, "ibus"):
+		*name = "ibus"
 	case strings.HasPrefix(*name, "cups"):
 		*name = "cups"
 	case strings.HasPrefix(*name, "xdg"):
@@ -172,16 +178,7 @@ func rename(name, commandline *string) {
 	case strings.HasPrefix(*name, "unity"):
 		*name = "unity-tools"
 
-		// GNOME
-	case strings.HasPrefix(*name, "gnome"):
-		switch *name {
-		case "gnome-terminal", "gnome-terminal.real":
-			*name = "terminal"
-		case "gnome-disks":
-			*name = "disks"
-		default:
-			*name = "gnome-shell"
-		}
+	// GNOME
 	case strings.HasPrefix(*name, "tracker"):
 		*name = "tracker"
 	case strings.HasPrefix(*name, "gvfs"):
@@ -194,8 +191,29 @@ func rename(name, commandline *string) {
 		*name = "goa"
 	case strings.HasPrefix(*name, "at-spi"):
 		*name = "at-spi"
+	case strings.HasPrefix(*name, "gnome"):
+		{
+			switch *name {
+			case "gnome-terminal", "gnome-terminal.real":
+				*name = "terminal"
+			case "gnome-disks":
+				*name = "disks"
+			default:
+				*name = "gnome-shell"
+			}
+		}
 
-		// Applications
+	// Database
+	case strings.HasPrefix(*name, "clickhouse"):
+		*name = "clickhouse"
+	case strings.HasPrefix(*name, "mongo"):
+		*name = "mongodb"
+	case strings.HasPrefix(*name, "mysql"):
+		*name = "mysql"
+	case strings.HasPrefix(*name, "redis"):
+		*name = "redis"
+
+	// Applications
 	case strings.HasPrefix(*name, "chrome"):
 		*name = "chrome"
 	case strings.HasPrefix(*name, "sysproxy-cmd"):
@@ -208,22 +226,14 @@ func rename(name, commandline *string) {
 		if *name != "VBoxClient" {
 			*name = "VirtualBoxVM"
 		}
-	case strings.HasPrefix(*name, "clickhouse"):
-		*name = "clickhouse"
-	case strings.HasPrefix(*name, "mongo"):
-		*name = "mongodb"
-	case strings.HasPrefix(*name, "mysql"):
-		*name = "mysql"
-	case strings.HasPrefix(*name, "redis"):
-		*name = "redis"
 	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
 		*name = "virt-manager"
+	}
 
-		// HasSuffix
-	case strings.HasSuffix(*name, "gjs"):
-		*name = "gjs"
-	case strings.HasSuffix(*name, "python3"), strings.HasPrefix(*name, "python"):
-		*name = "python"
+	// path > name
+	if strings.HasPrefix(*name, "/") {
+		tmp := *name
+		*name = tmp[strings.LastIndex(tmp, "/")+1:]
 	}
 }
 

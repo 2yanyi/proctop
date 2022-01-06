@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"r/scanner"
 	"runtime"
-	"strings"
 )
 
 var cpuMax = float64(runtime.NumCPU() * 100)
@@ -14,14 +13,14 @@ func WebsiteMatch(s string, cpu *float64) (_ string) {
 		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
 	}
 	if coreutils[s] {
-		return "\u001B[0;37;48mcoreutils\u001B[0m"
+		return "coreutils"
 	}
 	if utilLinux[s] {
-		return "\u001B[0;37;48mutil-linux\u001B[0m"
+		return "util-linux"
 	}
-	if strings.HasPrefix(components[s], "https://github.com") {
-		return strings.Join([]string{"\u001B[0;35;48m", components[s]}, "")
-	}
+	//if strings.HasPrefix(components[s], "https://github.com") {
+	//	return strings.Join([]string{"\u001B[0;35;48m", components[s]}, "")
+	//}
 	return components[s]
 }
 
@@ -42,8 +41,10 @@ var components = map[string]string{
 	"nm-dispatcher":      "https://github.com/freedesktop/NetworkManager/tree/master/src/nm-dispatcher",
 	"iio-sensor-proxy":   "https://github.com/hadess/iio-sensor-proxy",
 	"switcheroo-control": "https://github.com/hadess/switcheroo-control",
+	"xorg":               "https://x.org",
+	"xwayland":           "https://wayland.freedesktop.org",
 
-	// GNOME Components Source
+	// GNOME Components
 	"file-roller":   "https://github.com/gnome/file-roller",
 	"gvfs":          "https://github.com/gnome/gvfs",
 	"gsd":           "https://github.com/gnome/gnome-settings-daemon",
@@ -54,45 +55,43 @@ var components = map[string]string{
 	"evolution":     "https://github.com/gnome/evolution",
 	"dconf-service": "https://github.com/gnome/dconf",
 	"tracker":       "https://github.com/gnome/tracker",
+	"gnome-shell":   "https://gnome.org",
+	"terminal":      "https://wiki.gnome.org/Apps/Terminal",
+	"disks":         "https://wiki.gnome.org/Apps/Disks",
+	"nautilus":      "https://wiki.gnome.org/Apps/Files",
+	"boxes":         "https://wiki.gnome.org/Apps/Boxes",
+	"dconf-editor":  "https://wiki.gnome.org/Apps/DconfEditor",
+	"evince":        "https://wiki.gnome.org/Apps/Evince",
+	"totem":         "https://wiki.gnome.org/Apps/Videos",
+	"seahorse":      "https://wiki.gnome.org/Apps/Seahorse",
+	"gedit":         "https://wiki.gnome.org/Apps/Gedit",
 
-	// GNOME Components
-	"gnome-shell":  "https://gnome.org",
-	"terminal":     "https://wiki.gnome.org/Apps/Terminal",
-	"disks":        "https://wiki.gnome.org/Apps/Disks",
-	"nautilus":     "https://wiki.gnome.org/Apps/Files",
-	"boxes":        "https://wiki.gnome.org/Apps/Boxes",
-	"dconf-editor": "https://wiki.gnome.org/Apps/DconfEditor",
-	"evince":       "https://wiki.gnome.org/Apps/Evince",
-	"totem":        "https://wiki.gnome.org/Apps/Videos",
-
-	// System Components Source
-	"system76-power": "https://github.com/pop-os/system76-power",
-	"pop-upgrade":    "https://github.com/pop-os/upgrade",
-	"hidpi-daemon":   "https://github.com/pop-os/hidpi-daemon",
-	"cron":           "https://github.com/cronie-crond",
-	"bluetoothd":     "https://github.com/bluez",
-	"obexd":          "https://github.com/heinervdm/obexd",
-	"packagekitd":    "https://github.com/packagekit",
-	"ibus":           "https://github.com/ibus",
-	"fusermount":     "https://github.com/libfuse",
-	"auditd":         "https://github.com/linux-audit",
-	"touchegg":       "https://github.com/joseexposito/touchegg",
-	"thermald":       "https://github.com/intel/thermal_daemon",
-	"xdg":            "https://github.com/flatpak/xdg-desktop-portal",
-	"irqbalance":     "https://github.com/irqbalance",
-	"fsnotifier":     "https://github.com/jetbrains/intellij-community/tree/master/native/fsnotifier",
-	"avahi-daemon":   "https://github.com/lathiat/avahi",
-	"rtkit-daemon":   "https://github.com/heftig/rtkit",
-	"wpa_supplicant": "https://github.com/digsrc/wpa_supplicant",
-	"udisksd":        "https://github.com/storaged-project/udisks",
-	"cups":           "https://github.com/openprinting/cups-filters",
-	"compiz":         "https://github.com/compiz-reloaded/compiz",
-	"indicator":      "https://github.com/AyatanaIndicators/libayatana-indicator",
-
-	// System Components Website
+	// System Components
+	"system76-power":          "https://github.com/pop-os/system76-power",
+	"pop-upgrade":             "https://github.com/pop-os/upgrade",
+	"hidpi-daemon":            "https://github.com/pop-os/hidpi-daemon",
+	"cron":                    "https://github.com/cronie-crond",
+	"bluetoothd":              "https://github.com/bluez",
+	"obexd":                   "https://github.com/heinervdm/obexd",
+	"packagekitd":             "https://github.com/packagekit",
+	"ibus":                    "https://github.com/ibus",
+	"fusermount":              "https://github.com/libfuse",
+	"auditd":                  "https://github.com/linux-audit",
+	"touchegg":                "https://github.com/joseexposito/touchegg",
+	"thermald":                "https://github.com/intel/thermal_daemon",
+	"xdg":                     "https://github.com/flatpak/xdg-desktop-portal",
+	"irqbalance":              "https://github.com/irqbalance",
+	"fsnotifier":              "https://github.com/jetbrains/intellij-community/tree/master/native/fsnotifier",
+	"avahi-daemon":            "https://github.com/lathiat/avahi",
+	"rtkit-daemon":            "https://github.com/heftig/rtkit",
+	"wpa_supplicant":          "https://github.com/digsrc/wpa_supplicant",
+	"udisksd":                 "https://github.com/storaged-project/udisks",
+	"cups":                    "https://github.com/openprinting/cups-filters",
+	"compiz":                  "https://github.com/compiz-reloaded/compiz",
+	"indicator":               "https://github.com/AyatanaIndicators/libayatana-indicator",
+	"acpid":                   "https://sourceforge.net/projects/acpid2",
 	"bash":                    "https://gnu.org/software/bash",
 	"systemd":                 "https://systemd.io",
-	"xorg":                    "https://x.org",
 	"nacl_helper":             "https://nacl.cr.yp.to",
 	"io.elementary.appcenter": "https://appcenter.elementary.io",
 	"fcitx":                   "https://fcitx-im.org",
@@ -105,16 +104,20 @@ var components = map[string]string{
 	"notify-osd":              "https://launchpad.net/notify-osd",
 
 	// Applications
-	"virtualboxvm": "https://virtualbox.org",
-	"chrome":       "https://google.com/chrome",
-	"firefox":      "https://firefox.com",
-	"code":         "https://code.visualstudio.com",
-	"lantern":      "https://lantern.io",
-	"dbeaver":      "https://dbeaver.io",
-	"insomnia":     "https://insomnia.rest",
-	"blender":      "https://blender.org",
-	"kazam":        "https://launchpad.net/kazam",
-	"vlc":          "https://videolan.org",
+	"firefox":          "https://firefox.com",
+	"geckomain":        "https://wiki.mozilla.org/Gecko",
+	"webextensions":    "https://wiki.mozilla.org/WebExtensions",
+	"virtualboxvm":     "https://virtualbox.org",
+	"chrome":           "https://google.com/chrome",
+	"code":             "https://code.visualstudio.com",
+	"lantern":          "https://lantern.io",
+	"dbeaver":          "https://dbeaver.io",
+	"insomnia":         "https://insomnia.rest",
+	"blender":          "https://blender.org",
+	"kazam":            "https://launchpad.net/kazam",
+	"vlc":              "https://videolan.org",
+	"remmina":          "https://remmina.org",
+	"transmission-gtk": "https://transmissionbt.com",
 
 	// Server Components
 	"sshd":         "https://openssh.com",
@@ -134,23 +137,31 @@ var components = map[string]string{
 	"virt-manager": "https://virt-manager.org",
 
 	// Java
-	"java":           "https://openjdk.java.net",
-	"java:idea":      "https://jetbrains.com/idea",
-	"java:goland":    "https://jetbrains.com/go",
-	"java:hadoop":    "https://hadoop.apache.org",
-	"java:hbase":     "https://hbase.apache.org",
-	"java:zookeeper": "https://zookeeper.apache.org",
-	"java:kafka":     "https://kafka.apache.org",
+	"java":             "https://openjdk.java.net",
+	"java:idea":        "https://jetbrains.com/idea",
+	"java:goland":      "https://jetbrains.com/go",
+	"java:webstorm":    "https://jetbrains.com/webstorm",
+	"java:phpstorm":    "https://jetbrains.com/phpstorm",
+	"java:ruby":        "https://jetbrains.com/ruby",
+	"java:pycharmcore": "https://jetbrains.com/pycharm",
+	"java:rider":       "https://jetbrains.com/rider",
+	"java:clion":       "https://jetbrains.com/clion",
+	"java:datagrip":    "https://jetbrains.com/datagrip",
+	"java:hadoop":      "https://hadoop.apache.org",
+	"java:hbase":       "https://hbase.apache.org",
+	"java:zookeeper":   "https://zookeeper.apache.org",
+	"java:kafka":       "https://kafka.apache.org",
 
 	// Tools
-	"snapd":   "https://snapcraft.io",
-	"pigz":    "https://zlib.net/pigz",
-	"ffmpeg":  "https://ffmpeg.org",
-	"vim":     "https://vim.org",
-	"gotop":   "https://github.com/xxxserxxx/gotop",
-	"proctop": "https://github.com/matsuwin/proctop",
-	"go":      "https://go.dev",
-	"python":  "https://python.org",
+	"vim":        "https://vim.org",
+	"snapd":      "https://snapcraft.io",
+	"snap-store": "https://snapcraft.io/snap-store",
+	"pigz":       "https://zlib.net/pigz",
+	"ffmpeg":     "https://ffmpeg.org",
+	"gotop":      "https://github.com/xxxserxxx/gotop",
+	"proctop":    "https://github.com/matsuwin/proctop",
+	"git":        "https://git-scm.com",
+	"synaptic":   "https://github.com/mvo5/synaptic",
 }
 
 var utilLinux = map[string]bool{
@@ -263,6 +274,7 @@ var utilLinux = map[string]bool{
 }
 
 var coreutils = map[string]bool{
+	"vi":        true,
 	"arch":      true,
 	"b2sum":     true,
 	"base32":    true,
