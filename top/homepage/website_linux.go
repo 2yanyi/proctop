@@ -18,9 +18,6 @@ func WebsiteMatch(s string, cpu *float64) (_ string) {
 	if utilLinux[s] {
 		return "util-linux"
 	}
-	//if strings.HasPrefix(components[s], "https://github.com") {
-	//	return strings.Join([]string{"\u001B[0;35;48m", components[s]}, "")
-	//}
 	return components[s]
 }
 
