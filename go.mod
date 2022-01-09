@@ -2,7 +2,7 @@ module r
 
 go 1.17
 
-require github.com/shirou/gopsutil/v3 v3.21.11
+require github.com/shirou/gopsutil/v3 v3.21.12
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
