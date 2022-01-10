@@ -9,13 +9,11 @@ import (
 
 func Get() {
 	for i, cpu := range readCpus() {
-		fmt.Printf("CPU%d %s\n", i+1, cpu)
+		fmt.Printf(" CPU%d %s\n", i+1, cpu)
 	}
-	for _, elem := range readGpuAndUSB() {
-		fmt.Printf("%s\n", elem)
-	}
+	//for _, elem := range readGpuAndUSB() {fmt.Printf("%s\n", elem)}
 	OSName, OSVersion := release()
-	fmt.Printf(" Num Count  Memory                             Name    CPU%%  / %s %s\n"+
+	fmt.Printf("\n Num Count  Memory                             Name    CPU%%  / %s %s\n"+
 		"--------------------------------------------------------------------------------------\n",
 		OSName, OSVersion)
 }
