@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"r/flagset"
+	"os/exec"
+	"r/colors"
 	"r/scanner"
 	"r/top/homepage"
 	"runtime"
@@ -72,171 +73,6 @@ func combineSimilarItem(processes *[]scanner.Process) {
 	}
 }
 
-func renameJava(name, commandline *string) {
-
-	// Java: JetBrains
-	if strings.Contains(*commandline, "-Didea.vendor.name=JetBrains") {
-		for i, value := range strings.Split(*commandline, "-Didea.platform.prefix=") {
-			if i == 0 {
-				continue
-			}
-			*name = ""
-			for _, char := range value {
-				if char == ' ' {
-					break
-				}
-				*name += string(char)
-			}
-			*name = javaTag + strings.ToLower(*name)
-		}
-		return
-	}
-
-	// Java: hadoop
-	if strings.Contains(*commandline, "-Dhadoop.log") {
-		*name = javaTag + "hadoop"
-		return
-	}
-
-	// Java: hbase
-	if strings.Contains(*commandline, "-Dhbase.log") {
-		*name = javaTag + "hbase"
-		return
-	}
-
-	// Java: zookeeper
-	if strings.Contains(*commandline, "-Dzookeeper.log") {
-		*name = javaTag + "zookeeper"
-		return
-	}
-
-	// Java: kafka
-	if strings.Contains(*commandline, "-Dkafka.log") {
-		*name = javaTag + "kafka"
-		return
-	}
-
-	// java: jar
-	jars := strings.Count(*commandline, ".jar")
-	if jars == 1 {
-		values := strings.Split(*commandline, ".jar")[0]
-		value := values[strings.LastIndex(values, "/")+1:]
-		*name = javaTag + value + ".jar"
-		return
-	} else if jars > 1 {
-		*name = *commandline
-		return
-	}
-
-	values := strings.Fields(strings.ReplaceAll(*commandline, "=", " "))
-	tag := values[len(values)-2]
-	value := ""
-	if tag[0] == '-' {
-		value = values[len(values)-3]
-		if value[0] == '/' {
-			value = values[len(values)-1]
-		}
-	} else {
-		value = values[len(values)-1]
-	}
-	*name = javaTag + value
-}
-
-// 多个进程合并
-func rename(name, commandline *string) {
-
-	if *flagset.Java {
-		if *name == "java" {
-			renameJava(name, commandline)
-			return
-		}
-	}
-
-	switch {
-
-	// System
-	case strings.HasPrefix(*name, "upstart"):
-		*name = "upstart"
-	case strings.HasPrefix(*name, "indicator"):
-		*name = "indicator"
-	case strings.HasPrefix(*name, "systemd"), *name == "(sd-pam)":
-		*name = "systemd"
-	case strings.HasPrefix(*name, "dbus"):
-		*name = "dbus"
-	case strings.HasPrefix(*name, "ibus"):
-		*name = "ibus"
-	case strings.HasPrefix(*name, "cups"):
-		*name = "cups"
-	case strings.HasPrefix(*name, "xdg"):
-		*name = "xdg"
-	case strings.HasPrefix(*name, "fcitx"):
-		*name = "fcitx"
-	case strings.HasPrefix(*name, "evolution"):
-		*name = "evolution"
-	case strings.HasPrefix(*name, "pipewire"):
-		*name = "pipewire"
-	case strings.HasPrefix(*name, "unity"):
-		*name = "unity-tools"
-
-	// GNOME
-	case strings.HasPrefix(*name, "tracker"):
-		*name = "tracker"
-	case strings.HasPrefix(*name, "gvfs"):
-		*name = "gvfs"
-	case strings.HasPrefix(*name, "gdm"):
-		*name = "gdm"
-	case strings.HasPrefix(*name, "gsd"):
-		*name = "gsd"
-	case strings.HasPrefix(*name, "goa"):
-		*name = "goa"
-	case strings.HasPrefix(*name, "at-spi"):
-		*name = "at-spi"
-	case strings.HasPrefix(*name, "gnome"):
-		{
-			switch *name {
-			case "gnome-terminal", "gnome-terminal.real":
-				*name = "terminal"
-			case "gnome-disks":
-				*name = "disks"
-			default:
-				*name = "gnome-shell"
-			}
-		}
-
-	// Database
-	case strings.HasPrefix(*name, "clickhouse"):
-		*name = "clickhouse"
-	case strings.HasPrefix(*name, "mongo"):
-		*name = "mongodb"
-	case strings.HasPrefix(*name, "mysql"):
-		*name = "mysql"
-	case strings.HasPrefix(*name, "redis"):
-		*name = "redis"
-
-	// Applications
-	case strings.HasPrefix(*name, "chrome"):
-		*name = "chrome"
-	case strings.HasPrefix(*name, "sysproxy-cmd"):
-		*name = "lantern"
-	case strings.HasPrefix(*name, "docker"):
-		*name = "docker"
-	case strings.HasPrefix(*name, "PM2"):
-		*name = "PM2"
-	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
-		if *name != "VBoxClient" {
-			*name = "VirtualBoxVM"
-		}
-	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
-		*name = "virt-manager"
-	}
-
-	// path > name
-	if strings.HasPrefix(*name, "/") {
-		tmp := *name
-		*name = tmp[strings.LastIndex(tmp, "/")+1:]
-	}
-}
-
 func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 	for i, proc := range processes {
 		if i > limit {
@@ -250,18 +86,18 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
-			homepage.WebsiteMatch(strings.ToLower(proc.Name), &proc.CPUPercent),
+			cpuFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
-			page.WriteString(strings.Join([]string{"\u001B[0;37;48m", buf, "\u001B[0m\n"}, ""))
+			page.WriteString(colors.White(buf) + "\n")
 		} else if cpu == "0.0" {
-			page.WriteString(strings.Join([]string{"\u001B[0;34;48m", buf, "\u001B[0m\n"}, ""))
+			page.WriteString(colors.Blue(buf) + "\n")
 		} else if cpu == "0.1" {
-			page.WriteString(strings.Join([]string{"\u001B[0;36;48m", buf, "\u001B[0m\n"}, ""))
+			page.WriteString(colors.Cyan(buf) + "\n")
 		} else if len(cpu) >= 5 {
-			page.WriteString(strings.Join([]string{"\u001B[0;31;48m", buf, "\u001B[0m\n"}, ""))
+			page.WriteString(colors.Red(buf) + "\n")
 		} else {
-			page.WriteString(strings.Join([]string{"\u001B[0;33;48m", buf, "\u001B[0m\n"}, ""))
+			page.WriteString(colors.Yellow(buf) + "\n")
 		}
 	}
 	return
@@ -280,12 +116,53 @@ func sizeFormat(bytes float64) (_ string) {
 
 func nameFormat(s string) string {
 	if strings.HasPrefix(s, javaTag) {
-		return "                            \u001B[0;32;48m" + s
+		return "                            " + colors.Green(s)
 	}
 	if len(s) > 32 {
 		s = s[:30] + ".."
 	}
 	return s
+}
+
+func cpuFormat(s string, cpu *float64) (_ string) {
+	if s == scanner.StatisticsTag {
+		return fmt.Sprintf("%.2f%%  %s", *cpu/cpuMax*100, cpuTemperature())
+	}
+	if homepage.Coreutils[s] {
+		return "coreutils"
+	}
+	if homepage.UtilLinux[s] {
+		return "util-linux"
+	}
+	return homepage.Components[s]
+}
+
+func cpuTemperature() (C string) {
+	output, _ := exec.Command("sensors").Output()
+	if len(output) == 0 {
+		return "(need to install lm_sensors)"
+	}
+	for _, line := range strings.Split(string(output), "\n") {
+		if strings.HasPrefix(line, "Core") {
+			values := strings.Fields(line)
+			if len(values) < 2 {
+				continue
+			}
+			C = values[2]
+			break
+		}
+	}
+	if len(C) <= 1 {
+		return
+	}
+	N := C[1]
+	switch {
+	case N >= '5':
+		return strings.Join([]string{"\u001B[1;31;47m ", C, " \u001B[0m"}, "")
+	case N >= '7':
+		return strings.Join([]string{"\u001B[1;37;41m ", C, " \u001B[0m"}, "")
+	}
+	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
 }
 
 const javaTag = "java:"
@@ -296,4 +173,5 @@ const (
 	_GB = 1024 * 1024 * 1024
 )
 
+var cpuMax = float64(runtime.NumCPU() * 100)
 var ProcessId = int32(os.Getpid())

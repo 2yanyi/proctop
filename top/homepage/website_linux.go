@@ -1,45 +1,25 @@
 package homepage
 
-import (
-	"fmt"
-	"r/scanner"
-	"runtime"
-)
-
-var cpuMax = float64(runtime.NumCPU() * 100)
-
-func WebsiteMatch(s string, cpu *float64) (_ string) {
-	if s == scanner.StatisticsTag {
-		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
-	}
-	if coreutils[s] {
-		return "coreutils"
-	}
-	if utilLinux[s] {
-		return "util-linux"
-	}
-	return components[s]
-}
-
-var components = map[string]string{
+var Components = map[string]string{
 
 	// FreeDesktop Projects
-	"modemmanager":       "https://github.com/freedesktop/modemmanager",
-	"dbus":               "https://github.com/freedesktop/dbus",
-	"upowerd":            "https://github.com/freedesktop/upower",
-	"polkitd":            "https://github.com/freedesktop/polkit",
-	"accounts-daemon":    "https://github.com/freedesktop/accountsservice",
-	"geoclue":            "https://github.com/freedesktop/geoclue",
-	"colord":             "https://github.com/freedesktop/colord",
-	"pulseaudio":         "https://github.com/freedesktop/pulseaudio",
-	"plymouthd":          "https://github.com/freedesktop/plymouth",
-	"plymouth":           "https://github.com/freedesktop/plymouth",
-	"networkmanager":     "https://github.com/freedesktop/networkmanager",
-	"nm-dispatcher":      "https://github.com/freedesktop/NetworkManager/tree/master/src/nm-dispatcher",
-	"iio-sensor-proxy":   "https://github.com/hadess/iio-sensor-proxy",
-	"switcheroo-control": "https://github.com/hadess/switcheroo-control",
-	"xorg":               "https://x.org",
-	"xwayland":           "https://wayland.freedesktop.org",
+	"modemmanager":          "https://github.com/freedesktop/modemmanager",
+	"dbus":                  "https://github.com/freedesktop/dbus",
+	"upowerd":               "https://github.com/freedesktop/upower",
+	"polkitd":               "https://github.com/freedesktop/polkit",
+	"accounts-daemon":       "https://github.com/freedesktop/accountsservice",
+	"geoclue":               "https://github.com/freedesktop/geoclue",
+	"colord":                "https://github.com/freedesktop/colord",
+	"pulseaudio":            "https://github.com/freedesktop/pulseaudio",
+	"plymouthd":             "https://github.com/freedesktop/plymouth",
+	"plymouth":              "https://github.com/freedesktop/plymouth",
+	"networkmanager":        "https://github.com/freedesktop/networkmanager",
+	"nm-dispatcher":         "https://github.com/freedesktop/NetworkManager/tree/master/src/nm-dispatcher",
+	"iio-sensor-proxy":      "https://github.com/hadess/iio-sensor-proxy",
+	"switcheroo-control":    "https://github.com/hadess/switcheroo-control",
+	"xorg":                  "https://x.org",
+	"xwayland":              "https://wayland.freedesktop.org",
+	"power-profiles-daemon": "https://gitlab.freedesktop.org/hadess/power-profiles-daemon",
 
 	// GNOME Components
 	"file-roller":   "https://github.com/gnome/file-roller",
@@ -115,10 +95,12 @@ var components = map[string]string{
 	"vlc":              "https://videolan.org",
 	"remmina":          "https://remmina.org",
 	"transmission-gtk": "https://transmissionbt.com",
+	"rpi-imager":       "https://github.com/raspberrypi/rpi-imager",
 
 	// Server Components
 	"sshd":         "https://openssh.com",
 	"node":         "https://nodejs.org",
+	"python3":      "https://python.org",
 	"supervisord":  "http://supervisord.org",
 	"pm2":          "https://pm2.io",
 	"qemu-kvm":     "https://qemu.org",
@@ -161,7 +143,7 @@ var components = map[string]string{
 	"synaptic":   "https://github.com/mvo5/synaptic",
 }
 
-var utilLinux = map[string]bool{
+var UtilLinux = map[string]bool{
 	"addpart":      true,
 	"agetty":       true,
 	"blkdiscard":   true,
@@ -270,7 +252,7 @@ var utilLinux = map[string]bool{
 	"zramctl":      true,
 }
 
-var coreutils = map[string]bool{
+var Coreutils = map[string]bool{
 	"vi":        true,
 	"arch":      true,
 	"b2sum":     true,
