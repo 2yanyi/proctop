@@ -10,8 +10,16 @@
 
 ## Installing
 
+*Linux/amd64*
+
 ```sh
 sudo curl https://raw.githubusercontent.com/matsuwin/proctop/main/setup.sh | sh
+```
+
+*Raspberry Pi*
+
+```sh
+sudo curl https://raw.githubusercontent.com/matsuwin/proctop/main/setup-rasp.sh | sh
 ```
 
 <br>
