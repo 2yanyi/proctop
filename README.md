@@ -2,6 +2,8 @@
 
 适用于 Linux 的性能分析工具，实时显示进程的资源占用状态，类似于 TOP。具备 Java 增强功能。
 
+**同样适用于 Raspberry Pi (树莓派)。*
+
 <br>
 
 <img src="example.png">
