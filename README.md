@@ -4,7 +4,7 @@
 
 <br>
 
-<img src="demo.png">
+<img src="example.png">
 
 <br>
 
