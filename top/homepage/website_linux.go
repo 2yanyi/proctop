@@ -1,6 +1,7 @@
 package homepage
 
 var Components = map[string]string{
+	"proctop": "https://github.com/matsuwin/proctop",
 
 	// FreeDesktop Projects
 	"modemmanager":          "https://github.com/freedesktop/modemmanager",
@@ -20,6 +21,7 @@ var Components = map[string]string{
 	"xorg":                  "https://x.org",
 	"xwayland":              "https://wayland.freedesktop.org",
 	"power-profiles-daemon": "https://gitlab.freedesktop.org/hadess/power-profiles-daemon",
+	"lightdm":               "https://github.com/canonical/lightdm",
 
 	// GNOME Components
 	"file-roller":   "https://github.com/gnome/file-roller",
@@ -43,12 +45,20 @@ var Components = map[string]string{
 	"seahorse":      "https://wiki.gnome.org/Apps/Seahorse",
 	"gedit":         "https://wiki.gnome.org/Apps/Gedit",
 
+	// LXDE Components
+	"lxsession":   "https://github.com/lxde/lxsession",
+	"lxpanel":     "https://github.com/lxde/lxpanel",
+	"lxpolkit":    "https://github.com/lxqt/lxqt-policykit",
+	"pcmanfm":     "https://wiki.lxde.org/zh/PCManFM",
+	"menu-cached": "https://github.com/lxde/menu-cache",
+
 	// System Components
 	"system76-power":          "https://github.com/pop-os/system76-power",
 	"pop-upgrade":             "https://github.com/pop-os/upgrade",
 	"hidpi-daemon":            "https://github.com/pop-os/hidpi-daemon",
 	"cron":                    "https://github.com/cronie-crond",
 	"bluetoothd":              "https://github.com/bluez",
+	"hciattach":               "https://github.com/bluez/bluez/blob/master/tools/hciattach.c",
 	"obexd":                   "https://github.com/heinervdm/obexd",
 	"packagekitd":             "https://github.com/packagekit",
 	"ibus":                    "https://github.com/ibus",
@@ -79,6 +89,8 @@ var Components = map[string]string{
 	"upstart":                 "https://upstart.ubuntu.com",
 	"rinetd":                  "https://github.com/samhocevar/rinetd",
 	"notify-osd":              "https://launchpad.net/notify-osd",
+	"mutter":                  "https://github.com/collects/mutter",
+	"dhcpcd":                  "https://github.com/NetworkConfiguration/dhcpcd",
 
 	// Applications
 	"firefox":          "https://firefox.com",
@@ -132,13 +144,13 @@ var Components = map[string]string{
 	"java:kafka":       "https://kafka.apache.org",
 
 	// Tools
+	"apt":        "https://wiki.debian.org/Apt",
 	"vim":        "https://vim.org",
 	"snapd":      "https://snapcraft.io",
 	"snap-store": "https://snapcraft.io/snap-store",
 	"pigz":       "https://zlib.net/pigz",
 	"ffmpeg":     "https://ffmpeg.org",
 	"gotop":      "https://github.com/xxxserxxx/gotop",
-	"proctop":    "https://github.com/matsuwin/proctop",
 	"git":        "https://git-scm.com",
 	"synaptic":   "https://github.com/mvo5/synaptic",
 }

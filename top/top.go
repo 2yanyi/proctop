@@ -140,16 +140,27 @@ func cpuFormat(s string, cpu *float64) (_ string) {
 func cpuTemperature() (C string) {
 	output, _ := exec.Command("sensors").Output()
 	if len(output) == 0 {
-		return "(need to install lm_sensors)"
-	}
-	for _, line := range strings.Split(string(output), "\n") {
-		if strings.HasPrefix(line, "Core") {
-			values := strings.Fields(line)
-			if len(values) < 2 {
-				continue
+		output, _ = exec.Command("vcgencmd", "measure_temp").Output()
+		if len(output) != 0 {
+			text := strings.TrimSpace(string(output))
+			i := strings.Index(text, "=")
+			C = text[i+1:]
+			if C[0] != '-' {
+				C = "+" + text[i+1:]
 			}
-			C = values[2]
-			break
+		} else {
+			return "(need to install lm_sensors)"
+		}
+	} else {
+		for _, line := range strings.Split(string(output), "\n") {
+			if strings.HasPrefix(line, "Core") {
+				values := strings.Fields(line)
+				if len(values) < 2 {
+					continue
+				}
+				C = values[2]
+				break
+			}
 		}
 	}
 	if len(C) <= 1 {

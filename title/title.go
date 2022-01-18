@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -23,30 +24,43 @@ func readCpus() []string {
 	modelName := ""
 
 	// filter
-	for _, line := range strings.Split(cat("/proc/cpuinfo"), "\n") {
-		if strings.HasPrefix(line, "model name") {
-			modelName = line
-		} else if strings.HasPrefix(line, "physical id") {
-			if line == "" {
+	info := strings.Split(cat("/proc/cpuinfo"), "\n")
+	for _, elem := range info {
+		if strings.HasPrefix(elem, "model name") {
+			modelName = elem
+		} else if strings.HasPrefix(elem, "physical id") {
+			if elem == "" {
 				continue
 			}
-			cpus[line] = append(cpus[line], modelName)
+			cpus[elem] = append(cpus[elem], modelName)
 		}
 	}
 
 	// return
 	slice := make([]string, 0, len(cpus))
 	for i := range cpus {
-		elem := fmt.Sprintf("%s %d*Thread\n", cpus[i][0], len(cpus[i]))
-		for index, char := range elem {
-			if char == ':' {
-				elem = elem[index+1:]
-				break
+		slice = append(slice, threadJoin(cpus[i][0], len(cpus[i])))
+	}
+
+	if len(slice) == 0 {
+		for _, elem := range info {
+			if strings.HasPrefix(elem, "Model") {
+				return []string{threadJoin(elem, runtime.NumCPU())}
 			}
 		}
-		slice = append(slice, strings.TrimSpace(elem))
 	}
 	return slice
+}
+
+func threadJoin(model string, threadCount int) string {
+	elem := fmt.Sprintf("%s %d*Thread\n", model, threadCount)
+	for index, char := range elem {
+		if char == ':' {
+			elem = elem[index+1:]
+			break
+		}
+	}
+	return strings.TrimSpace(elem)
 }
 
 func readGpuAndUSB() []string {
