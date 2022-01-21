@@ -144,15 +144,17 @@ var Components = map[string]string{
 	"java:kafka":       "https://kafka.apache.org",
 
 	// Tools
-	"apt":        "https://wiki.debian.org/Apt",
-	"vim":        "https://vim.org",
-	"snapd":      "https://snapcraft.io",
-	"snap-store": "https://snapcraft.io/snap-store",
-	"pigz":       "https://zlib.net/pigz",
-	"ffmpeg":     "https://ffmpeg.org",
-	"gotop":      "https://github.com/xxxserxxx/gotop",
-	"git":        "https://git-scm.com",
-	"synaptic":   "https://github.com/mvo5/synaptic",
+	"apt":          "https://wiki.debian.org/Apt",
+	"vim":          "https://vim.org",
+	"snapd":        "https://snapcraft.io",
+	"snap-store":   "https://snapcraft.io/snap-store",
+	"pigz":         "https://zlib.net/pigz",
+	"ffmpeg":       "https://ffmpeg.org",
+	"gotop":        "https://github.com/xxxserxxx/gotop",
+	"git":          "https://git-scm.com",
+	"synaptic":     "https://github.com/mvo5/synaptic",
+	"bpftrace":     "https://github.com/iovisor/bpftrace",
+	"wineserver64": "https://winehq.org",
 }
 
 var UtilLinux = map[string]bool{

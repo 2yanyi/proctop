@@ -15,6 +15,9 @@
 - 处理器温度实时预览。
 - 一键安装。
 
+*扩展功能*
+  - 本地磁盘写入速率检测
+
 <br>
 
 <img src="example.png">
@@ -23,13 +26,13 @@
 
 ## Installing
 
-*Linux/amd64*
+*linux/amd64*
 
 ```sh
 sudo curl https://raw.githubusercontent.com/matsuwin/proctop/main/setup.sh | sh
 ```
 
-*Raspberry Pi*
+*linux/arm for Raspberry Pi*
 
 ```sh
 sudo curl https://raw.githubusercontent.com/matsuwin/proctop/main/setup-rasp.sh | sh
@@ -42,14 +45,16 @@ sudo curl https://raw.githubusercontent.com/matsuwin/proctop/main/setup-rasp.sh 
 ```sh
 $ proctop --help
 Usage of proctop:
+  -diskw
+        Disk write rate Test
   -java
-    	Java process list
+        Java process list
   -l int
-    	limit (default 10)
+        limit (default 10)
   -version
-    	show version information
+        show version information
 ```
 
 ```sh
-proctop -l 55
+proctop -l 33
 ```

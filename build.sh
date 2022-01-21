@@ -5,9 +5,6 @@ if !(type go >/dev/null 2>&1); then
     exit
 fi
 
-export GOPROXY=https://goproxy.cn
-gofmt -w .
-
 # build
 if [[ $1 == "dist" ]]; then
 
@@ -19,21 +16,19 @@ if [[ $1 == "dist" ]]; then
     # version++
     version=$(($(cat version)+1)); printf ${version} > version
 
-    # Windows
-    GOOS=windows GOARCH=386 go build -ldflags '-X main.BuildID='${version} -o bin/proctop.exe main.go
+    # linux/amd64
+    GOOS=linux GOARCH=amd64 go build -ldflags '-linkmode "external" -extldflags "-static" -X main.BuildID='${version} -o proctop main.go
+    tar -cf - proctop | pigz > bin/elf.x64-proctop.tar.gz
 
-    # Raspberry Pi
+    # linux/arm (Raspberry Pi)
     GOOS=linux GOARCH=arm go build -ldflags '-X main.BuildID='${version} -o proctop main.go
     tar -cf - proctop | pigz > bin/elf.raspberry-proctop.tar.gz
-
-    # Linux
-    GOOS=linux GOARCH=amd64 go build \
-        -ldflags '-linkmode "external" -extldflags "-static" -X main.BuildID='${version} -o proctop main.go
-    tar -cf - proctop | pigz > bin/elf.x64-proctop.tar.gz
 
     rm -f proctop
 
 else
+    gofmt -w .
+    GOPROXY=https://goproxy.cn
 
     go build -ldflags '-X main.BuildID='${version} -o bin/proctop main.go
 
