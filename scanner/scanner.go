@@ -14,7 +14,7 @@ type Process struct {
 }
 
 func Processes() []Process {
-	elements := make([]Process, 0, 100)
+	elements := make([]Process, 0, 500)
 	processes, processErr := process.Processes()
 	if processErr != nil {
 		panic(processErr)

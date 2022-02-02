@@ -1,18 +1,15 @@
 package top
 
 import (
-	"r/flagset"
 	"strings"
 )
 
 // 多个进程合并
 func rename(name, commandline *string) {
 
-	if *flagset.Java {
-		if *name == "java" {
-			renameJava(name, commandline)
-			return
-		}
+	if *name == "java" {
+		renameJava(name, commandline)
+		return
 	}
 
 	switch {
@@ -93,7 +90,7 @@ func rename(name, commandline *string) {
 		*name = "virt-manager"
 	}
 
-	// path > name
+	// Path -> Name
 	if strings.HasPrefix(*name, "/") {
 		tmp := *name
 		*name = tmp[strings.LastIndex(tmp, "/")+1:]
@@ -152,7 +149,7 @@ func renameJava(name, commandline *string) {
 		*name = javaTag + value + ".jar"
 		return
 	} else if jars > 1 {
-		*name = *commandline
+		//*name = *commandline
 		return
 	}
 

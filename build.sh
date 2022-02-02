@@ -22,13 +22,13 @@ if [[ $1 == "dist" ]]; then
 
     # linux/arm (Raspberry Pi)
     GOOS=linux GOARCH=arm go build -ldflags '-X main.BuildID='${version} -o proctop main.go
-    tar -cf - proctop | pigz > bin/elf.raspberry-proctop.tar.gz
+    tar -cf - proctop | pigz > bin/elf.arm-proctop.tar.gz
 
     rm -f proctop
 
 else
     gofmt -w .
-    GOPROXY=https://goproxy.cn
+    export GOPROXY=https://goproxy.cn
 
     go build -ldflags '-X main.BuildID='${version} -o bin/proctop main.go
 

@@ -18,7 +18,7 @@ func main() {
 	if runtime.GOOS == "linux" {
 		clear()
 	}
-	title.Get()
+	title.Show()
 
 	owspace.New(func(w *owspace.Writer) {
 		t := time.NewTicker(time.Millisecond * 2000)

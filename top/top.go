@@ -51,6 +51,9 @@ func combineSimilarItem(processes *[]scanner.Process) {
 			case "sudo", "su", "sh", "bash":
 				continue
 			}
+			if strings.HasSuffix(proc.Name, ".sh") && proc.CPUPercent < 0.1 {
+				continue
+			}
 			rename(&proc.Name, &proc.Commandline)
 		}
 		if elem, has := sets[proc.Name]; has {
@@ -89,15 +92,15 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			cpuFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
-			page.WriteString(colors.White(buf) + "\n")
+			page.WriteString(colors.White(buf, colors.Zero) + "\n")
 		} else if cpu == "0.0" {
-			page.WriteString(colors.Blue(buf) + "\n")
+			page.WriteString(colors.Blue(buf, colors.Zero) + "\n")
 		} else if cpu == "0.1" {
-			page.WriteString(colors.Cyan(buf) + "\n")
+			page.WriteString(colors.Cyan(buf, colors.Zero) + "\n")
 		} else if len(cpu) >= 5 {
-			page.WriteString(colors.Red(buf) + "\n")
+			page.WriteString(colors.Red(buf, colors.Zero) + "\n")
 		} else {
-			page.WriteString(colors.Yellow(buf) + "\n")
+			page.WriteString(colors.Yellow(buf, colors.Zero) + "\n")
 		}
 	}
 	return
@@ -116,7 +119,8 @@ func sizeFormat(bytes float64) (_ string) {
 
 func nameFormat(s string) string {
 	if strings.HasPrefix(s, javaTag) {
-		return "                            " + colors.Green(s)
+		//return "                            " + colors.Green(s)
+		return s
 	}
 	if len(s) > 32 {
 		s = s[:30] + ".."
@@ -176,7 +180,7 @@ func cpuTemperature() (C string) {
 	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
 }
 
-const javaTag = "java:"
+const javaTag = "J/"
 
 const (
 	_KB = 1024

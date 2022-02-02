@@ -54,6 +54,7 @@ var Components = map[string]string{
 
 	// System Components
 	"system76-power":          "https://github.com/pop-os/system76-power",
+	"system76-scheduler":      "https://github.com/pop-os/system76-scheduler",
 	"pop-upgrade":             "https://github.com/pop-os/upgrade",
 	"hidpi-daemon":            "https://github.com/pop-os/hidpi-daemon",
 	"cron":                    "https://github.com/cronie-crond",
@@ -108,6 +109,7 @@ var Components = map[string]string{
 	"remmina":          "https://remmina.org",
 	"transmission-gtk": "https://transmissionbt.com",
 	"rpi-imager":       "https://github.com/raspberrypi/rpi-imager",
+	"jcef_helper":      "https://github.com/chromiumembedded/java-cef",
 
 	// Server Components
 	"sshd":         "https://openssh.com",
@@ -128,20 +130,20 @@ var Components = map[string]string{
 	"virt-manager": "https://virt-manager.org",
 
 	// Java
-	"java":             "https://openjdk.java.net",
-	"java:idea":        "https://jetbrains.com/idea",
-	"java:goland":      "https://jetbrains.com/go",
-	"java:webstorm":    "https://jetbrains.com/webstorm",
-	"java:phpstorm":    "https://jetbrains.com/phpstorm",
-	"java:ruby":        "https://jetbrains.com/ruby",
-	"java:pycharmcore": "https://jetbrains.com/pycharm",
-	"java:rider":       "https://jetbrains.com/rider",
-	"java:clion":       "https://jetbrains.com/clion",
-	"java:datagrip":    "https://jetbrains.com/datagrip",
-	"java:hadoop":      "https://hadoop.apache.org",
-	"java:hbase":       "https://hbase.apache.org",
-	"java:zookeeper":   "https://zookeeper.apache.org",
-	"java:kafka":       "https://kafka.apache.org",
+	"java":          "https://openjdk.java.net",
+	"j/idea":        "https://jetbrains.com/idea",
+	"j/goland":      "https://jetbrains.com/go",
+	"j/webstorm":    "https://jetbrains.com/webstorm",
+	"j/phpstorm":    "https://jetbrains.com/phpstorm",
+	"j/ruby":        "https://jetbrains.com/ruby",
+	"j/pycharmcore": "https://jetbrains.com/pycharm",
+	"j/rider":       "https://jetbrains.com/rider",
+	"j/clion":       "https://jetbrains.com/clion",
+	"j/datagrip":    "https://jetbrains.com/datagrip",
+	"j/hadoop":      "https://hadoop.apache.org",
+	"j/hbase":       "https://hbase.apache.org",
+	"j/zookeeper":   "https://zookeeper.apache.org",
+	"j/kafka":       "https://kafka.apache.org",
 
 	// Tools
 	"apt":          "https://wiki.debian.org/Apt",

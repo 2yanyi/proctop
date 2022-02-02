@@ -16,7 +16,6 @@ const (
 var fs = flag.NewFlagSet(binary, flag.ExitOnError)
 var (
 	__version       = fs.Bool("version", false, "show version information")
-	Java            = fs.Bool("java", false, "Java process list")
 	__diskWriteRate = fs.Bool("diskw", false, "Disk write rate Test")
 	Limit           = fs.Int("l", 10, "limit")
 )

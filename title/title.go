@@ -2,24 +2,57 @@ package title
 
 import (
 	"fmt"
+	"github.com/utilgo/execve"
+	"net"
 	"os"
 	"os/exec"
+	"r/colors"
 	"runtime"
 	"strings"
 )
 
-func Get() {
-	for i, cpu := range readCpus() {
-		fmt.Printf(" CPU%d %s\n", i+1, cpu)
+func LanAddress() map[string]string {
+	address := make(map[string]string, 10)
+	nia, _ := net.InterfaceAddrs()
+	ni, _ := net.Interfaces()
+	for i, it := range ni {
+		mac := it.HardwareAddr.String()
+		if mac == "" {
+			continue
+		}
+		if addr, has := nia[i].(*net.IPNet); has {
+			address[mac] = addr.IP.String()
+		}
 	}
-	//for _, elem := range readGpuAndUSB() {fmt.Printf("%s\n", elem)}
-	OSName, OSVersion := release()
-	fmt.Printf("\n Num Count  Memory                             Name    CPU%%  / %s %s\n"+
-		"--------------------------------------------------------------------------------------\n",
-		OSName, OSVersion)
+	return address
 }
 
-func readCpus() []string {
+func showNameplate() {
+	var lanAddress string
+	for _, addr := range LanAddress() {
+		lanAddress += " " + addr
+	}
+	address := fmt.Sprintf("(%s)%s ", execve.Args("", []string{"whoami"}), lanAddress)
+	logo := strings.Join([]string{"\u001B[1;30;42m", " ProcTop ", "\u001B[0m"}, "")
+	thread := colors.Green(fmt.Sprintf("%d*Thread", runtime.NumCPU()), colors.Italic)
+	fmt.Printf("%s %s %s / %s %s\n", logo, uname(), thread, release(), address)
+}
+
+func Show() {
+	header()
+	fmt.Print(colors.White(
+		"\n Num Count  Memory                             Name    CPU%                           ", colors.Underscore))
+	fmt.Println(colors.White(" 永不宕机(never downtime)", colors.Italic))
+}
+
+func header() {
+	showNameplate()
+	for i, cpu := range readCPUs() {
+		fmt.Println(colors.White(fmt.Sprintf(" - CPU%d %s", i+1, cpu), colors.Dark))
+	}
+}
+
+func readCPUs() []string {
 	cpus := make(map[string][]string)
 	modelName := ""
 
@@ -41,10 +74,18 @@ func readCpus() []string {
 	for i := range cpus {
 		slice = append(slice, threadJoin(cpus[i][0], len(cpus[i])))
 	}
-
 	if len(slice) == 0 {
+
+		// Compatible Raspberry Pi
 		for _, elem := range info {
 			if strings.HasPrefix(elem, "Model") {
+				return []string{threadJoin(elem, runtime.NumCPU())}
+			}
+		}
+
+		// Compatible other
+		for _, elem := range info {
+			if strings.HasPrefix(elem, "model name") {
 				return []string{threadJoin(elem, runtime.NumCPU())}
 			}
 		}
@@ -63,52 +104,23 @@ func threadJoin(model string, threadCount int) string {
 	return strings.TrimSpace(elem)
 }
 
-func readGpuAndUSB() []string {
-	lsPCI, err := exec.Command("lspci").Output()
-	if err != nil {
-		return nil
-	}
-
-	// filter
-	gpus := make([]string, 0)
-	usbs := make([]string, 0)
-	for _, line := range strings.Split(string(lsPCI), "\n") {
-		if len(line) < 8 {
-			continue
-		}
-		elem := line[8:]
-		switch {
-		case strings.HasPrefix(elem, "VGA"):
-			for index, char := range elem {
-				if char == ':' {
-					elem = elem[index+1:]
-					break
-				}
+func uname() (r string) {
+	i := 0
+	kernel, _ := exec.Command("uname", "-rs").Output()
+	for _, char := range kernel {
+		if char == '.' {
+			i++
+			if i == 2 {
+				break
 			}
-			gpus = append(gpus, strings.TrimSpace(elem))
-		case strings.HasPrefix(elem, "USB"):
-			for index, char := range elem {
-				if char == ':' {
-					elem = elem[index+1:]
-					break
-				}
-			}
-			usbs = append(usbs, strings.TrimSpace(elem))
 		}
+		r += string(char)
 	}
-
-	// return
-	slice := make([]string, 0, len(gpus)+len(usbs))
-	for i, elem := range gpus {
-		slice = append(slice, fmt.Sprintf("GPU%d %s", i+1, elem))
-	}
-	for i, elem := range usbs {
-		slice = append(slice, fmt.Sprintf("USB%d %s", i+1, elem))
-	}
-	return slice
+	return
 }
 
-func release() (name, version string) {
+func release() string {
+	var name, version string
 	for _, elem := range strings.Split(cat("/etc/os-release"), "\n") {
 		if strings.HasPrefix(elem, "NAME=") {
 			name = elem[5:]
@@ -129,7 +141,7 @@ func release() (name, version string) {
 			}
 		}
 	}
-	return
+	return strings.Join([]string{name, version}, " ")
 }
 
 func cat(fp string) string {
