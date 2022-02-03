@@ -4,7 +4,10 @@ import (
 	"strings"
 )
 
-// 多个进程合并
+/**
+ * 同名进程合并
+ */
+
 func rename(name, commandline *string) {
 
 	if *name == "java" {
@@ -75,19 +78,25 @@ func rename(name, commandline *string) {
 
 	// Applications
 	case strings.HasPrefix(*name, "chrome"):
-		*name = "chrome"
+		if strings.Contains(*commandline, "chromium") {
+			*name = "chromium"
+		} else {
+			*name = "chrome"
+		}
 	case strings.HasPrefix(*name, "sysproxy-cmd"):
 		*name = "lantern"
 	case strings.HasPrefix(*name, "docker"):
 		*name = "docker"
 	case strings.HasPrefix(*name, "PM2"):
 		*name = "PM2"
+	case strings.HasPrefix(*name, "fsnotifier"):
+		*name = "fsnotifier"
+	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
+		*name = "virt-manager"
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
 		if *name != "VBoxClient" {
 			*name = "VirtualBoxVM"
 		}
-	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
-		*name = "virt-manager"
 	}
 
 	// Path -> Name
@@ -100,7 +109,7 @@ func rename(name, commandline *string) {
 func renameJava(name, commandline *string) {
 
 	// Java: JetBrains
-	if strings.Contains(*commandline, "-Didea.vendor.name=JetBrains") {
+	if strings.Contains(*commandline, "-Didea.vendor.name=") {
 		for i, value := range strings.Split(*commandline, "-Didea.platform.prefix=") {
 			if i == 0 {
 				continue
@@ -112,7 +121,7 @@ func renameJava(name, commandline *string) {
 				}
 				*name += string(char)
 			}
-			*name = javaTag + strings.ToLower(*name)
+			*name = javaTag + *name
 		}
 		return
 	}
@@ -149,7 +158,6 @@ func renameJava(name, commandline *string) {
 		*name = javaTag + value + ".jar"
 		return
 	} else if jars > 1 {
-		//*name = *commandline
 		return
 	}
 

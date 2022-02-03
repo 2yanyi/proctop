@@ -89,7 +89,7 @@ func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
-			cpuFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
+			websiteFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
 			page.WriteString(colors.White(buf, colors.Zero) + "\n")
@@ -128,7 +128,7 @@ func nameFormat(s string) string {
 	return s
 }
 
-func cpuFormat(s string, cpu *float64) (_ string) {
+func websiteFormat(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
 		return fmt.Sprintf("%.2f%%  %s", *cpu/cpuMax*100, cpuTemperature())
 	}
