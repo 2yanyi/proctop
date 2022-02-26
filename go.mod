@@ -3,8 +3,8 @@ module r
 go 1.17
 
 require (
-	github.com/shirou/gopsutil/v3 v3.21.12
-	github.com/utilgo/execve v0.0.0-20220122091250-b23a6c4c3327
+	github.com/shirou/gopsutil/v3 v3.22.1
+	github.com/utilgo/execve v0.1.0
 )
 
 require (
@@ -14,5 +14,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.3.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/sys v0.0.0-20211013075003-97ac67df715c // indirect
+	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
+	golang.org/x/text v0.3.7 // indirect
 )
