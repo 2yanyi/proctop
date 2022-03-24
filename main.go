@@ -15,9 +15,7 @@ func main() {
 	if !flagset.Init(BuildID) {
 		return
 	}
-	if !variable.IsWin {
-		clear()
-	}
+	clear()
 	title.Show()
 
 	owspace.New(func(w *owspace.Writer) {
@@ -31,6 +29,9 @@ func main() {
 
 func clear() {
 	cmd := exec.Command("clear")
+	if variable.IsWin {
+		cmd = exec.Command("cmd", "/c", "cls")
+	}
 	cmd.Stdout = os.Stdout
 	_ = cmd.Run()
 }

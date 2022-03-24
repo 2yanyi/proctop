@@ -6,31 +6,12 @@ import (
 )
 
 /**
-* 同名进程合并
+ * 同名进程合并
  */
 
 func rename(name, commandline *string) {
 	if variable.IsWin {
-		if strings.HasSuffix(*name, ".exe") {
-			*name = strings.TrimSuffix(*name, ".exe")
-		}
-		switch *name {
-		case "StartMenuExperienceHost",
-			"ApplicationFrameHost",
-			"ShellExperienceHost",
-			"BackgroundTaskHost",
-			"TextInputHost",
-			"SearchHost",
-			"conhost", "svchost", "sihost", "dllhost", "taskhostw",
-			"SystemSettings", "SystemSettingsBroker",
-			"Widgets", "LockApp":
-			*name = "SystemHost"
-		case "GameBar", "GameBarFTServer", "Video.UI":
-			*name = "Xbox GameBar"
-		}
-		if *name == "喜马拉雅" {
-			*name = "Ximalaya"
-		}
+		renameWindows(name)
 	}
 	if *name == "java" {
 		renameJava(name, commandline)
@@ -118,6 +99,8 @@ func rename(name, commandline *string) {
 		*name = "virt-manager"
 	case strings.HasPrefix(*name, "BaiduNetdisk"):
 		*name = "BaiduDrive"
+	case *name == "steamwebhelper":
+		*name = "steam"
 
 	// VM
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
@@ -137,6 +120,37 @@ func rename(name, commandline *string) {
 	if strings.HasPrefix(*name, "/") {
 		tmp := *name
 		*name = tmp[strings.LastIndex(tmp, "/")+1:]
+	}
+}
+
+func renameWindows(name *string) {
+	if strings.HasSuffix(*name, ".exe") {
+		*name = strings.TrimSuffix(*name, ".exe")
+	}
+	switch *name {
+	case "StartMenuExperienceHost",
+		"ApplicationFrameHost",
+		"ShellExperienceHost",
+		"backgroundTaskHost",
+		"TextInputHost",
+		"SearchHost",
+		"conhost", "svchost", "sihost", "dllhost", "taskhostw",
+		"SystemSettings", "SystemSettingsBroker",
+		"Widgets", "LockApp":
+		*name = "SystemHost"
+	case "GameBar", "GameBarFTServer", "Video.UI":
+		*name = "Xbox GameBar"
+	}
+	switch {
+	case strings.HasPrefix(*name, "AMD"), *name == "RadeonSoftware":
+		*name = "AMD Radeon Software"
+	case strings.HasPrefix(*name, "Armoury"), *name == "Aura Wallpaper Service":
+		*name = "ROG ArmouryCrate"
+	case strings.HasPrefix(strings.ToLower(*name), "asus"):
+		*name = "ASUS Software"
+	}
+	if *name == "喜马拉雅" {
+		*name = "Ximalaya"
 	}
 }
 

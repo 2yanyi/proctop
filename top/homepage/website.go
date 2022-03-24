@@ -67,6 +67,7 @@ var Components = map[string]string{
 	"menu-cached": "https://github.com/lxde/menu-cache",
 
 	// System Components
+	"kworker":                 "kernel",
 	"cron":                    "https://github.com/cronie-crond",
 	"bluetoothd":              "https://github.com/bluez",
 	"hciattach":               "https://github.com/bluez/bluez/blob/master/tools/hciattach.c",
@@ -126,15 +127,18 @@ var Components = map[string]string{
 	"steam":                    "https://store.steampowered.com",
 	"powershell":               "https://github.com/powershell",
 	"windowsterminal":          "https://github.com/microsoft/terminal",
+	"amd radeon software":      "https://amd.com/zh-hans/technologies/software",
+	"asus software":            "https://www.asus.com/asus-software",
+	"rog armourycrate":         "https://rog.asus.com/armoury-crate",
+	"xbox gamebar":             "https://microsoft.com/zh-cn/p/xbox-game-bar/9nzkpstsnw4p",
 	"dingtalk":                 "https://dingtalk.com",
 	"adrive":                   "https://aliyundrive.com",
 	"baidudrive":               "https://pan.baidu.com",
 	"idman":                    "https://internetdownloadmanager.com",
-	"armourycrate":             "https://rog.asus.com/armoury-crate",
-	"radeonsoftware":           "https://amd.com/zh-hans/technologies/software",
 	"ximalaya":                 "https://ximalaya.com",
 	"vmplayer":                 "https://vmware.com/products/workstation-player",
 	"vmware-vmx":               "https://vmware.com",
+	"clangd":                   "https://clangd.llvm.org",
 
 	// Server Components
 	"sshd":         "https://openssh.com",

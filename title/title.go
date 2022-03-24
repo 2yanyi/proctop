@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"r/colors"
+	"r/data/variable"
 	"runtime"
 	"strconv"
 	"strings"
@@ -32,7 +33,7 @@ func Show() {
 	showNameplate()
 	cpu := showCPUModel()
 	fmt.Print(colors.White(
-		"\n Num Count  Memory                             Name    CPU%                           ", colors.Underscore))
+		"\n Num Count  Memory                             Name    CPU%                                     ", colors.Underscore))
 	switch cpu {
 	case "amd":
 		fmt.Println(colors.White(" AMD YES!", colors.Italic))
@@ -46,36 +47,74 @@ func Show() {
 func showNameplate() {
 	var lanAddress string
 	for _, addr := range LanAddress() {
-		if strings.HasPrefix(addr, ":") {
+		if strings.Contains(addr, ":") {
 			continue
 		}
-		lanAddress += " " + addr
+		lanAddress += ", " + addr
 	}
 	address := fmt.Sprintf("(%s)%s ", execve.Args("", []string{"whoami"}), lanAddress)
 	logo := strings.Join([]string{"\u001B[1;30;42m", " ProcTop ", "\u001B[0m"}, "")
-	thread := colors.Green(fmt.Sprintf("%d*Thread", runtime.NumCPU()), colors.Italic)
+	thread := colors.Fuchsia(fmt.Sprintf("%d*Thread", runtime.NumCPU()), colors.Italic)
 	fmt.Printf("%s %s %s / %s %s\n", logo, uname(), thread, release(), address)
 }
 
 func showCPUModel() string {
-	var name, mhz string
+	cpuTag := ""
+	if variable.IsWin {
+		cpuTag = cpuModelWindows()
+	} else {
+		cpuTag = cpuModelLinux()
+	}
+	fmt.Printf("[  CPU  ]  %s\n", colors.Green(cpuTag, colors.Italic))
+
+	if strings.HasPrefix(cpuTag, "AMD") {
+		return "amd"
+	} else {
+		return "intel"
+	}
+}
+
+func cpuModelLinux() (_ string) {
+	var name, ghz string
 	for _, elem := range strings.Split(cat("/proc/cpuinfo"), "\n") {
 		if strings.HasPrefix(elem, "model name") {
 			name = splitValue(elem)
 		}
 		if strings.HasPrefix(elem, "cpu MHz") {
 			num, _ := strconv.ParseFloat(splitValue(elem), 64)
-			mhz = fmt.Sprintf("%.1fGHz", num/1000)
+			ghz = fmt.Sprintf("%.1fGHz", num/1000)
 			break
 		}
 	}
-	fmt.Printf("[  CPU  ]  %s @ %s\n", name, mhz)
+	return fmt.Sprintf("%s @ %s", name, ghz)
+}
 
-	if strings.HasPrefix(name, "AMD") {
-		return "amd"
-	} else {
-		return "intel"
+func cpuModelWindows() (_ string) {
+	var name, ghz string
+	text := execve.Args("", []string{"wmic", "cpu", "list", "brief"})
+	for _i, line := range strings.Split(text, "\n") {
+		if _i == 0 {
+			continue
+		}
+		values := strings.Split(line, "  ")
+		vas := make([]string, 0, len(values))
+		for i := len(values) - 1; i >= 0; i-- {
+			if values[i] == "" {
+				continue
+			}
+			vas = append(vas, values[i])
+		}
+		for i := range vas {
+			if i == 1 {
+				name = strings.TrimSpace(vas[i])
+			}
+			if i == 2 {
+				num, _ := strconv.ParseFloat(vas[i], 64)
+				ghz = fmt.Sprintf("%.1fGHz", num/1000)
+			}
+		}
 	}
+	return fmt.Sprintf("%s @ %s", name, ghz)
 }
 
 func splitValue(s string) string {
@@ -139,6 +178,9 @@ func threadJoin(model string, threadCount int) string {
 }
 
 func uname() (r string) {
+	if variable.IsWin {
+		return "Windows NT"
+	}
 	i := 0
 	kernel, _ := exec.Command("uname", "-rs").Output()
 	for _, char := range kernel {
@@ -154,6 +196,9 @@ func uname() (r string) {
 }
 
 func release() string {
+	if variable.IsWin {
+		return "^_^"
+	}
 	var name, version string
 	for _, elem := range strings.Split(cat("/etc/os-release"), "\n") {
 		if strings.HasPrefix(elem, "NAME=") {
