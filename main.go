@@ -3,11 +3,11 @@ package main
 import (
 	"os"
 	"os/exec"
+	"r/data/variable"
 	"r/flagset"
 	"r/owspace"
 	"r/title"
 	"r/top"
-	"runtime"
 	"time"
 )
 
@@ -15,7 +15,7 @@ func main() {
 	if !flagset.Init(BuildID) {
 		return
 	}
-	if runtime.GOOS == "linux" {
+	if !variable.IsWin {
 		clear()
 	}
 	title.Show()

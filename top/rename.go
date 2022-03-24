@@ -1,23 +1,46 @@
 package top
 
 import (
+	"r/data/variable"
 	"strings"
 )
 
 /**
- * 同名进程合并
+* 同名进程合并
  */
 
 func rename(name, commandline *string) {
-
+	if variable.IsWin {
+		if strings.HasSuffix(*name, ".exe") {
+			*name = strings.TrimSuffix(*name, ".exe")
+		}
+		switch *name {
+		case "StartMenuExperienceHost",
+			"ApplicationFrameHost",
+			"ShellExperienceHost",
+			"BackgroundTaskHost",
+			"TextInputHost",
+			"SearchHost",
+			"conhost", "svchost", "sihost", "dllhost", "taskhostw",
+			"SystemSettings", "SystemSettingsBroker",
+			"Widgets", "LockApp":
+			*name = "SystemHost"
+		case "GameBar", "GameBarFTServer", "Video.UI":
+			*name = "Xbox GameBar"
+		}
+		if *name == "喜马拉雅" {
+			*name = "Ximalaya"
+		}
+	}
 	if *name == "java" {
 		renameJava(name, commandline)
 		return
 	}
-
 	switch {
 
 	// System
+	case strings.HasPrefix(*name, "kworker/"):
+		*name = "kworker"
 	case strings.HasPrefix(*name, "upstart"):
 		*name = "upstart"
 	case strings.HasPrefix(*name, "indicator"):
@@ -93,11 +116,22 @@ func rename(name, commandline *string) {
 		*name = "fsnotifier"
 	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
 		*name = "virt-manager"
+	case strings.HasPrefix(*name, "BaiduNetdisk"):
+		*name = "BaiduDrive"
+
+	// VM
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
 		if *name != "VBoxClient" {
 			*name = "VirtualBoxVM"
 		}
-	}
+	case *name == "vmtoolsd", *name == "vmware-vmblock-fuse", *name == "vmhgfs-fuse", *name == "VGAuthService":
+		*name = "vmware-tools"
+
+	// Java
+	case *name == "goland64":
+		*name = "J/Goland"
+
+	} // END
 
 	// Path -> Name
 	if strings.HasPrefix(*name, "/") {

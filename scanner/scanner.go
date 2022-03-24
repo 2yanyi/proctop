@@ -13,38 +13,32 @@ type Process struct {
 	Count       int
 }
 
-func Processes() []Process {
-	elements := make([]Process, 0, 500)
-	processes, processErr := process.Processes()
-	if processErr != nil {
-		panic(processErr)
+func Processes() []*Process {
+	slice := make([]*Process, 0, 500)
+	processes, err := process.Processes()
+	if err != nil {
+		panic(err)
 	}
-	statistics := Process{Name: StatisticsTag}
-	for _, proc := range processes {
-		elem, has := ignore(proc)
-		if has {
-			continue
-		}
-		statistics.CPUPercent += elem.CPUPercent
-		statistics.MemoryBytes += elem.MemoryBytes
-		elements = append(elements, elem)
+	statistics := &Process{Name: StatisticsTag}
+	for i := range processes {
+		it := processInfo(processes[i])
+		statistics.CPUPercent += it.CPUPercent
+		statistics.MemoryBytes += it.MemoryBytes
+		slice = append(slice, it)
 	}
-	elements = append(elements, statistics)
-	return elements
+	slice = append(slice, statistics)
+	return slice
 }
 
-func ignore(proc *process.Process) (elem Process, _ bool) {
-	elem.Commandline, _ = proc.Cmdline()
-	if elem.Commandline == "" {
-		return elem, true
-	}
-	elem.Process = proc
-	elem.Name, _ = proc.Name()
-	elem.CPUPercent, _ = proc.CPUPercent()
+func processInfo(proc *process.Process) *Process {
+	it := &Process{Process: proc}
+	it.Commandline, _ = proc.Cmdline()
+	it.Name, _ = proc.Name()
+	it.CPUPercent, _ = proc.CPUPercent()
 	MemoryInfo, _ := proc.MemoryInfo()
 	if MemoryInfo != nil {
-		elem.MemoryBytes = MemoryInfo.RSS
+		it.MemoryBytes = MemoryInfo.RSS
 	}
-	elem.Count = 1
-	return
+	it.Count = 1
+	return it
 }

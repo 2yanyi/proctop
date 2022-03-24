@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"r/colors"
+	"r/data/variable"
 	"r/scanner"
 	"r/top/homepage"
 	"runtime"
@@ -26,10 +26,10 @@ func Call(limit int) string {
 
 	// 排序
 	sort.Slice(processes, func(i, j int) bool {
-		if processes[i].CPUPercent > processes[j].CPUPercent {
-			return true
+		if processes[i] == nil || processes[j] == nil {
+			return false
 		}
-		return false
+		return processes[i].CPUPercent > processes[j].CPUPercent
 	})
 
 	// 填充画面
@@ -38,15 +38,13 @@ func Call(limit int) string {
 	return page.String()
 }
 
-func combineSimilarItem(processes *[]scanner.Process) {
-	sets := make(map[string]scanner.Process)
+func combineSimilarItem(processes *[]*scanner.Process) {
+	set := make(map[string]*scanner.Process)
 	for _, proc := range *processes {
-		if proc.Process != nil {
-			if proc.Process.Pid == ProcessId {
-				continue
-			}
+		if ignore(proc) {
+			continue
 		}
-		if runtime.GOOS == "linux" {
+		if !variable.IsWin {
 			switch proc.Name {
 			case "sudo", "su", "sh", "bash":
 				continue
@@ -54,19 +52,20 @@ func combineSimilarItem(processes *[]scanner.Process) {
 			if strings.HasSuffix(proc.Name, ".sh") && proc.CPUPercent < 0.1 {
 				continue
 			}
-			rename(&proc.Name, &proc.Commandline)
 		}
-		if elem, has := sets[proc.Name]; has {
+		rename(&proc.Name, &proc.Commandline)
+
+		if elem, has := set[proc.Name]; has {
 			proc.Count += elem.Count
 			proc.CPUPercent += elem.CPUPercent
 			proc.MemoryBytes += elem.MemoryBytes
-			sets[proc.Name] = proc
+			set[proc.Name] = proc
 		} else {
-			sets[proc.Name] = proc
+			set[proc.Name] = proc
 		}
 	}
 	*processes = nil
-	for _, proc := range sets {
+	for _, proc := range set {
 		if proc.CPUPercent < 0.1 {
 			if proc.Name == "sshd" {
 				proc.CPUPercent = 0.1
@@ -76,12 +75,29 @@ func combineSimilarItem(processes *[]scanner.Process) {
 	}
 }
 
-func fillScreen(processes []scanner.Process, limit int) (page bytes.Buffer) {
+func ignore(proc *scanner.Process) bool {
+	if proc == nil {
+		return true
+	}
+	if proc.Process != nil {
+		if proc.Process.Pid == ProcessId {
+			return true
+		}
+	}
+	if proc.MemoryBytes == 0 && proc.CPUPercent < 0.1 {
+		return true
+	}
+	return false
+}
+
+func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 	for i, proc := range processes {
+		if proc == nil {
+			continue
+		}
 		if i > limit {
 			break
 		}
-
 		cpu := fmt.Sprintf("%.1f", proc.CPUPercent)
 		buf := fmt.Sprintf("%3d)  %2d  %7s  %32s  %6s  %s",
 			i,                                     // Num
@@ -119,7 +135,6 @@ func sizeFormat(bytes float64) (_ string) {
 
 func nameFormat(s string) string {
 	if strings.HasPrefix(s, javaTag) {
-		//return "                            " + colors.Green(s)
 		return s
 	}
 	if len(s) > 32 {
@@ -130,7 +145,7 @@ func nameFormat(s string) string {
 
 func websiteFormat(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
-		return fmt.Sprintf("%.2f%%  %s", *cpu/cpuMax*100, cpuTemperature())
+		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
 	}
 	if homepage.Coreutils[s] {
 		return "coreutils"
@@ -141,44 +156,44 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 	return homepage.Components[s]
 }
 
-func cpuTemperature() (C string) {
-	output, _ := exec.Command("sensors").Output()
-	if len(output) == 0 {
-		output, _ = exec.Command("vcgencmd", "measure_temp").Output()
-		if len(output) != 0 {
-			text := strings.TrimSpace(string(output))
-			i := strings.Index(text, "=")
-			C = text[i+1:]
-			if C[0] != '-' {
-				C = "+" + text[i+1:]
-			}
-		} else {
-			return "(need to install lm_sensors)"
-		}
-	} else {
-		for _, line := range strings.Split(string(output), "\n") {
-			if strings.HasPrefix(line, "Core") {
-				values := strings.Fields(line)
-				if len(values) < 2 {
-					continue
-				}
-				C = values[2]
-				break
-			}
-		}
-	}
-	if len(C) <= 1 {
-		return
-	}
-	N := C[1]
-	switch {
-	case N >= '5':
-		return strings.Join([]string{"\u001B[1;31;47m ", C, " \u001B[0m"}, "")
-	case N >= '7':
-		return strings.Join([]string{"\u001B[1;37;41m ", C, " \u001B[0m"}, "")
-	}
-	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
-}
+//func cpuTemperature() (C string) {
+//	output, _ := exec.Command("sensors").Output()
+//	if len(output) == 0 {
+//		output, _ = exec.Command("vcgencmd", "measure_temp").Output()
+//		if len(output) != 0 {
+//			text := strings.TrimSpace(string(output))
+//			i := strings.Index(text, "=")
+//			C = text[i+1:]
+//			if C[0] != '-' {
+//				C = "+" + text[i+1:]
+//			}
+//		} else {
+//			return "(need to install lm_sensors)"
+//		}
+//	} else {
+//		for _, line := range strings.Split(string(output), "\n") {
+//			if strings.HasPrefix(line, "Core") {
+//				values := strings.Fields(line)
+//				if len(values) < 2 {
+//					continue
+//				}
+//				C = values[2]
+//				break
+//			}
+//		}
+//	}
+//	if len(C) <= 1 {
+//		return
+//	}
+//	N := C[1]
+//	switch {
+//	case N >= '5':
+//		return strings.Join([]string{"\u001B[1;31;47m ", C, " \u001B[0m"}, "")
+//	case N >= '7':
+//		return strings.Join([]string{"\u001B[1;37;41m ", C, " \u001B[0m"}, "")
+//	}
+//	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
+//}
 
 const javaTag = "J/"
 

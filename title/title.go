@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"r/colors"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -27,9 +28,27 @@ func LanAddress() map[string]string {
 	return address
 }
 
+func Show() {
+	showNameplate()
+	cpu := showCPUModel()
+	fmt.Print(colors.White(
+		"\n Num Count  Memory                             Name    CPU%                           ", colors.Underscore))
+	switch cpu {
+	case "amd":
+		fmt.Println(colors.White(" AMD YES!", colors.Italic))
+	case "intel":
+		fmt.Println(colors.White(" Intel NB!", colors.Italic))
+	default:
+		fmt.Println(colors.White(" Hello World", colors.Italic))
+	}
+}
+
 func showNameplate() {
 	var lanAddress string
 	for _, addr := range LanAddress() {
+		if strings.HasPrefix(addr, ":") {
+			continue
+		}
 		lanAddress += " " + addr
 	}
 	address := fmt.Sprintf("(%s)%s ", execve.Args("", []string{"whoami"}), lanAddress)
@@ -38,18 +57,33 @@ func showNameplate() {
 	fmt.Printf("%s %s %s / %s %s\n", logo, uname(), thread, release(), address)
 }
 
-func Show() {
-	header()
-	fmt.Print(colors.White(
-		"\n Num Count  Memory                             Name    CPU%                           ", colors.Underscore))
-	fmt.Println(colors.White(" 永不宕机(never downtime)", colors.Italic))
+func showCPUModel() string {
+	var name, mhz string
+	for _, elem := range strings.Split(cat("/proc/cpuinfo"), "\n") {
+		if strings.HasPrefix(elem, "model name") {
+			name = splitValue(elem)
+		}
+		if strings.HasPrefix(elem, "cpu MHz") {
+			num, _ := strconv.ParseFloat(splitValue(elem), 64)
+			mhz = fmt.Sprintf("%.1fGHz", num/1000)
+			break
+		}
+	}
+	fmt.Printf("[  CPU  ]  %s @ %s\n", name, mhz)
+
+	if strings.HasPrefix(name, "AMD") {
+		return "amd"
+	} else {
+		return "intel"
+	}
 }
 
-func header() {
-	showNameplate()
-	for i, cpu := range readCPUs() {
-		fmt.Println(colors.White(fmt.Sprintf(" - CPU%d %s", i+1, cpu), colors.Dark))
+func splitValue(s string) string {
+	vs := strings.Split(s, ":")
+	if len(vs) < 2 {
+		return "<null>"
 	}
+	return strings.TrimSpace(vs[1])
 }
 
 func readCPUs() []string {
