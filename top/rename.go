@@ -11,96 +11,110 @@ import (
 
 func rename(name, commandline *string) {
 	if variable.IsWin {
-		renameWindows(name)
+		if strings.HasSuffix(*name, ".exe") {
+			*name = strings.TrimSuffix(*name, ".exe")
+		}
 	}
 	if *name == "java" {
 		renameJava(name, commandline)
 		return
+	} else {
+		defer func(bak string) {
+			if *name != bak {
+				*name += " >"
+			}
+		}(*name)
 	}
+	if variable.IsWin {
+		renameWindows(name)
+	}
+
 	switch {
 
 	// System
 	case strings.HasPrefix(*name, "kworker/"):
-		*name = "kworker"
+		*name = "Kernel Worker"
+	case strings.HasPrefix(*name, "migration/"):
+		*name = "Migration"
 	case strings.HasPrefix(*name, "upstart"):
-		*name = "upstart"
+		*name = "UPStart"
 	case strings.HasPrefix(*name, "indicator"):
-		*name = "indicator"
+		*name = "Indicator"
 	case strings.HasPrefix(*name, "systemd"), *name == "(sd-pam)":
-		*name = "systemd"
+		*name = "Systemd"
 	case strings.HasPrefix(*name, "dbus"):
-		*name = "dbus"
+		*name = "Dbus"
 	case strings.HasPrefix(*name, "ibus"):
-		*name = "ibus"
+		*name = "Ibus"
 	case strings.HasPrefix(*name, "cups"):
-		*name = "cups"
+		*name = "Cups"
 	case strings.HasPrefix(*name, "xdg"):
-		*name = "xdg"
+		*name = "Xdg"
 	case strings.HasPrefix(*name, "fcitx"):
-		*name = "fcitx"
+		*name = "Fcitx"
 	case strings.HasPrefix(*name, "evolution"):
-		*name = "evolution"
+		*name = "Evolution"
 	case strings.HasPrefix(*name, "pipewire"):
-		*name = "pipewire"
+		*name = "PipeWire"
 	case strings.HasPrefix(*name, "unity"):
-		*name = "unity-tools"
+		*name = "Unity-tools"
 
 	// GNOME
 	case strings.HasPrefix(*name, "tracker"):
-		*name = "tracker"
+		*name = "Tracker"
 	case strings.HasPrefix(*name, "gvfs"):
-		*name = "gvfs"
+		*name = "Gvfs"
 	case strings.HasPrefix(*name, "gdm"):
-		*name = "gdm"
+		*name = "Gdm"
 	case strings.HasPrefix(*name, "gsd"):
-		*name = "gsd"
+		*name = "Gsd"
 	case strings.HasPrefix(*name, "goa"):
-		*name = "goa"
+		*name = "Goa"
 	case strings.HasPrefix(*name, "at-spi"):
-		*name = "at-spi"
+		*name = "AT-spi"
 	case strings.HasPrefix(*name, "gnome"):
 		{
 			switch *name {
 			case "gnome-terminal", "gnome-terminal.real":
-				*name = "terminal"
+				*name = "Terminal"
 			case "gnome-disks":
 				*name = "disks"
 			default:
-				*name = "gnome-shell"
+				*name = "GNOME"
 			}
 		}
 
 	// Database
 	case strings.HasPrefix(*name, "clickhouse"):
-		*name = "clickhouse"
+		*name = "ClickHouse"
 	case strings.HasPrefix(*name, "mongo"):
-		*name = "mongodb"
+		*name = "MongoDB"
 	case strings.HasPrefix(*name, "mysql"):
-		*name = "mysql"
+		*name = "MySQL"
 	case strings.HasPrefix(*name, "redis"):
-		*name = "redis"
+		*name = "Redis"
 
 	// Applications
 	case strings.HasPrefix(*name, "chrome"):
 		if strings.Contains(*commandline, "chromium") {
 			*name = "chromium"
 		} else {
-			*name = "chrome"
+			*name = "Google Chrome"
 		}
 	case strings.HasPrefix(*name, "sysproxy-cmd"):
-		*name = "lantern"
+		*name = "Lantern"
 	case strings.HasPrefix(*name, "docker"):
-		*name = "docker"
+		*name = "Docker"
 	case strings.HasPrefix(*name, "PM2"):
 		*name = "PM2"
 	case strings.HasPrefix(*name, "fsnotifier"):
-		*name = "fsnotifier"
+		*name = "FsNotifier"
 	case strings.HasPrefix(*name, "virt"), *name == "libvirtd":
-		*name = "virt-manager"
+		*name = "Virt-manager"
 	case strings.HasPrefix(*name, "BaiduNetdisk"):
 		*name = "BaiduDrive"
 	case *name == "steamwebhelper":
-		*name = "steam"
+		*name = "Steam"
 
 	// VM
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
@@ -108,7 +122,7 @@ func rename(name, commandline *string) {
 			*name = "VirtualBoxVM"
 		}
 	case *name == "vmtoolsd", *name == "vmware-vmblock-fuse", *name == "vmhgfs-fuse", *name == "VGAuthService":
-		*name = "vmware-tools"
+		*name = "VMware-tools"
 
 	// Java
 	case *name == "goland64":
@@ -124,9 +138,6 @@ func rename(name, commandline *string) {
 }
 
 func renameWindows(name *string) {
-	if strings.HasSuffix(*name, ".exe") {
-		*name = strings.TrimSuffix(*name, ".exe")
-	}
 	switch *name {
 	case "StartMenuExperienceHost",
 		"ApplicationFrameHost",
@@ -135,22 +146,33 @@ func renameWindows(name *string) {
 		"TextInputHost",
 		"SearchHost",
 		"conhost", "svchost", "sihost", "dllhost", "taskhostw",
-		"SystemSettings", "SystemSettingsBroker",
-		"Widgets", "LockApp":
-		*name = "SystemHost"
+		"SystemSettings", "SystemSettingsBroker", "Widgets", "LockApp",
+		"ctfmon":
+		*name = "System Host"
+	case "hvsirdpclient", "hvsirpcd", "hvsimgr":
+		*name = "Windows Defender"
+	case "WindowsTerminal", "OpenConsole":
+		*name = "Windows Terminal"
 	case "GameBar", "GameBarFTServer", "Video.UI":
 		*name = "Xbox GameBar"
+	case "HxTsr":
+		*name = "Microsoft Office"
+	case "WeChatStore", "WsaClient":
+		*name = "WeChat"
+	case "IObitUninstaler", "UninstallMonitor":
+		*name = "IObit Uninstaller"
+	case "RtkAudUService64", "RtkUWP":
+		*name = "Realtek Audio"
+	case "喜马拉雅":
+		*name = "Ximalaya"
 	}
 	switch {
-	case strings.HasPrefix(*name, "AMD"), *name == "RadeonSoftware":
+	case strings.HasPrefix(*name, "AMD"), *name == "RadeonSoftware", *name == "cncmd":
 		*name = "AMD Radeon Software"
 	case strings.HasPrefix(*name, "Armoury"), *name == "Aura Wallpaper Service":
 		*name = "ROG ArmouryCrate"
-	case strings.HasPrefix(strings.ToLower(*name), "asus"):
+	case strings.HasPrefix(strings.ToLower(*name), "asus"), *name == "AcPowerNotification", *name == "AsHotplugCtrl":
 		*name = "ASUS Software"
-	}
-	if *name == "喜马拉雅" {
-		*name = "Ximalaya"
 	}
 }
 
@@ -176,25 +198,25 @@ func renameJava(name, commandline *string) {
 
 	// Java: hadoop
 	if strings.Contains(*commandline, "-Dhadoop.log") {
-		*name = javaTag + "hadoop"
+		*name = javaTag + "Hadoop"
 		return
 	}
 
 	// Java: hbase
 	if strings.Contains(*commandline, "-Dhbase.log") {
-		*name = javaTag + "hbase"
+		*name = javaTag + "Hbase"
 		return
 	}
 
 	// Java: zookeeper
 	if strings.Contains(*commandline, "-Dzookeeper.log") {
-		*name = javaTag + "zookeeper"
+		*name = javaTag + "Zookeeper"
 		return
 	}
 
 	// Java: kafka
 	if strings.Contains(*commandline, "-Dkafka.log") {
-		*name = javaTag + "kafka"
+		*name = javaTag + "Kafka"
 		return
 	}
 

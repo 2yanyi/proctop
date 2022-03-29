@@ -17,13 +17,13 @@ func LanAddress() map[string]string {
 	address := make(map[string]string, 10)
 	nia, _ := net.InterfaceAddrs()
 	ni, _ := net.Interfaces()
-	for i, it := range ni {
-		mac := it.HardwareAddr.String()
-		if mac == "" {
+	niN := len(ni) - 1
+	for i := range nia {
+		if niN < i {
 			continue
 		}
 		if addr, has := nia[i].(*net.IPNet); has {
-			address[mac] = addr.IP.String()
+			address[ni[i].HardwareAddr.String()] = addr.IP.String()
 		}
 	}
 	return address

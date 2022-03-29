@@ -15,6 +15,7 @@ if [[ $1 == "dist" ]]; then
 
     # version++
     version=$(($(cat version)+1)); printf ${version} > version
+    # version=$(date '+%Y%m%d.%H%M')
 
     # linux/amd64
     GOOS=linux GOARCH=amd64 go build -ldflags '-linkmode "external" -extldflags "-static" -X main.BuildID='${version} -o proctop main.go

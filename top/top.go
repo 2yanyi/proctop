@@ -84,7 +84,7 @@ func ignore(proc *scanner.Process) bool {
 			return true
 		}
 	}
-	if proc.MemoryBytes == 0 && proc.CPUPercent < 0.1 {
+	if proc.MemoryBytes == 0 && proc.CPUPercent < 1 {
 		return true
 	}
 	return false
@@ -147,12 +147,15 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
 		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
 	}
-	if homepage.Coreutils[s] {
-		return "coreutils"
+	if !variable.IsWin {
+		if homepage.Coreutils[s] {
+			return "coreutils"
+		}
+		if homepage.UtilLinux[s] {
+			return "util-linux"
+		}
 	}
-	if homepage.UtilLinux[s] {
-		return "util-linux"
-	}
+	s = strings.TrimSuffix(s, " >")
 	return homepage.Components[s]
 }
 
