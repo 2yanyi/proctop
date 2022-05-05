@@ -12,6 +12,10 @@ import (
 )
 
 func main() {
+
+	// pprof
+	// defer profile.Start(profile.CPUProfile, profile.ProfilePath(".")).Stop() // github.com/pkg/profile
+
 	if !flagset.Init(BuildID) {
 		return
 	}
@@ -19,7 +23,7 @@ func main() {
 	title.Show()
 
 	owspace.New(func(w *owspace.Writer) {
-		t := time.NewTicker(time.Millisecond * 2000)
+		t := time.NewTicker(time.Second * 3)
 		w.Write(top.Call(*flagset.Limit))
 		for range t.C {
 			w.Write(top.Call(*flagset.Limit))

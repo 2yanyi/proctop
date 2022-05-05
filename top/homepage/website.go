@@ -67,8 +67,6 @@ var Components = map[string]string{
 	"menu-cached": "https://github.com/lxde/menu-cache",
 
 	// System Components
-	"kernel worker":           "kernel",
-	"migration":               "kernel",
 	"cron":                    "https://github.com/cronie-crond",
 	"bluetoothd":              "https://github.com/bluez",
 	"hciattach":               "https://github.com/bluez/bluez/blob/master/tools/hciattach.c",
@@ -196,6 +194,8 @@ var Components = map[string]string{
 	"bpftrace":     "https://github.com/iovisor/bpftrace",
 	"wineserver64": "https://winehq.org",
 	"chsime":       "微软拼音输入法",
+
+	// Kernel
 
 	// Windows Basic
 	"system host":            "basic",

@@ -31,11 +31,27 @@ func rename(name, commandline *string) {
 
 	switch {
 
-	// System
+	// Kernel
 	case strings.HasPrefix(*name, "kworker/"):
-		*name = "Kernel Worker"
+		*name = "Kworker"
+	case strings.HasPrefix(*name, "ksoftirqd/"):
+		*name = "Ksoftirqd"
+	case strings.HasPrefix(*name, "irq/"):
+		*name = "Irq"
 	case strings.HasPrefix(*name, "migration/"):
 		*name = "Migration"
+	case strings.HasPrefix(*name, "idle_inject/"):
+		*name = "Idle_inject"
+	case strings.HasPrefix(*name, "cpuhp/"):
+		*name = "Cpuhp"
+	case strings.HasPrefix(*name, "scsi_"):
+		*name = "SCSI"
+	case strings.HasPrefix(*name, "rcu"):
+		*name = "RCU"
+	case strings.HasPrefix(*name, "card0-"):
+		*name = "card0"
+
+	// System
 	case strings.HasPrefix(*name, "upstart"):
 		*name = "UPStart"
 	case strings.HasPrefix(*name, "indicator"):
@@ -60,29 +76,45 @@ func rename(name, commandline *string) {
 		*name = "Unity-tools"
 
 	// GNOME
-	case strings.HasPrefix(*name, "tracker"):
-		*name = "Tracker"
-	case strings.HasPrefix(*name, "gvfs"):
-		*name = "Gvfs"
-	case strings.HasPrefix(*name, "gdm"):
-		*name = "Gdm"
-	case strings.HasPrefix(*name, "gsd"):
-		*name = "Gsd"
-	case strings.HasPrefix(*name, "goa"):
-		*name = "Goa"
-	case strings.HasPrefix(*name, "at-spi"):
-		*name = "AT-spi"
-	case strings.HasPrefix(*name, "gnome"):
-		{
-			switch *name {
-			case "gnome-terminal", "gnome-terminal.real":
-				*name = "Terminal"
-			case "gnome-disks":
-				*name = "disks"
-			default:
-				*name = "GNOME"
-			}
+	case strings.HasPrefix(*name, "tracker"),
+		strings.HasPrefix(*name, "gvfs"),
+		strings.HasPrefix(*name, "gdm"),
+		strings.HasPrefix(*name, "gsd"),
+		strings.HasPrefix(*name, "goa"),
+		strings.HasPrefix(*name, "at-spi"),
+		strings.HasPrefix(*name, "gnome"), *name == "gjs", *name == "dconf-service":
+		switch *name {
+		case "gnome-terminal":
+			*name = "Terminal"
+		case "gnome-disks":
+			*name = "disks"
+		default:
+			*name = "GNOME"
 		}
+
+	// case strings.HasPrefix(*name, "tracker"):
+	// 	*name = "Tracker"
+	// case strings.HasPrefix(*name, "gvfs"):
+	// 	*name = "Gvfs"
+	// case strings.HasPrefix(*name, "gdm"):
+	// 	*name = "Gdm"
+	// case strings.HasPrefix(*name, "gsd"):
+	// 	*name = "Gsd"
+	// case strings.HasPrefix(*name, "goa"):
+	// 	*name = "Goa"
+	// case strings.HasPrefix(*name, "at-spi"):
+	// 	*name = "AT-spi"
+	// case strings.HasPrefix(*name, "gnome"):
+	// 	{
+	// 		switch *name {
+	// 		case "gnome-terminal", "gnome-terminal.real":
+	// 			*name = "Terminal"
+	// 		case "gnome-disks":
+	// 			*name = "disks"
+	// 		default:
+	// 			*name = "GNOME"
+	// 		}
+	// 	}
 
 	// Database
 	case strings.HasPrefix(*name, "clickhouse"):

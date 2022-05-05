@@ -18,6 +18,8 @@ var (
 	__version       = fs.Bool("version", false, "show version information")
 	__diskWriteRate = fs.Bool("diskw", false, "Disk write rate Test")
 	Limit           = fs.Int("l", 10, "limit")
+	UserProcess     = fs.Bool("u", false, "user process")
+	KernelProcess   = fs.Bool("k", false, "kernel process")
 )
 
 func Init(BuildID string) (_ bool) {

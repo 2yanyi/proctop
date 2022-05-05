@@ -1,1 +1,1 @@
-./build.sh; ./bin/proctop -l 88
+./build.sh; sudo ./bin/proctop -l 70

@@ -3,9 +3,11 @@ package top
 import (
 	"bytes"
 	"fmt"
+	"github.com/utilgo/execve"
 	"os"
 	"r/colors"
 	"r/data/variable"
+	"r/flagset"
 	"r/scanner"
 	"r/top/homepage"
 	"runtime"
@@ -54,11 +56,16 @@ func combineSimilarItem(processes *[]*scanner.Process) {
 			}
 		}
 		rename(&proc.Name, &proc.Commandline)
+		// if strings.HasSuffix(proc.Name, " >") {continue}
 
 		if elem, has := set[proc.Name]; has {
 			proc.Count += elem.Count
 			proc.CPUPercent += elem.CPUPercent
 			proc.MemoryBytes += elem.MemoryBytes
+			proc.NumThreads += elem.NumThreads
+			proc.NumFDs += elem.NumFDs
+			proc.FIOReadBytes += elem.FIOReadBytes
+			proc.FIOWriteBytes += elem.FIOWriteBytes
 			set[proc.Name] = proc
 		} else {
 			set[proc.Name] = proc
@@ -79,13 +86,15 @@ func ignore(proc *scanner.Process) bool {
 	if proc == nil {
 		return true
 	}
-	if proc.Process != nil {
-		if proc.Process.Pid == ProcessId {
+	if *flagset.UserProcess {
+		if proc.MemoryBytes == 0 {
 			return true
 		}
 	}
-	if proc.MemoryBytes == 0 && proc.CPUPercent < 1 {
-		return true
+	if *flagset.KernelProcess {
+		if !(proc.MemoryBytes == 0) {
+			return true
+		}
 	}
 	return false
 }
@@ -98,13 +107,31 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 		if i > limit {
 			break
 		}
+		ioState := fmt.Sprintf("%7s/%s", sizeFormat(float64(proc.FIOReadBytes)), sizeFormat(float64(proc.FIOWriteBytes)))
+		_ioState := strings.TrimSpace(ioState)
+		if _ioState == "/" {
+			ioState = ""
+		} else {
+			switch {
+			case strings.HasPrefix(_ioState, "/"):
+				ioState = "0" + _ioState
+			case strings.HasSuffix(_ioState, "/"):
+				ioState += "0"
+			}
+		}
+
 		cpu := fmt.Sprintf("%.1f", proc.CPUPercent)
-		buf := fmt.Sprintf("%3d)  %2d  %7s  %32s  %6s  %s",
+		buf := fmt.Sprintf("%3d)  %5d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %7s  %s",
 			i,                                     // Num
+			proc.Ppid,                             // PPID
 			proc.Count,                            // count
 			sizeFormat(float64(proc.MemoryBytes)), // Memory
 			nameFormat(proc.Name),                 // Name
 			cpu,                                   // CPU
+			proc.NumThreads,
+			proc.NumFDs,
+			ioState,
+			proc.Status, // status
 			websiteFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
 		)
 		if proc.Name == scanner.StatisticsTag {
@@ -145,7 +172,7 @@ func nameFormat(s string) string {
 
 func websiteFormat(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
-		return fmt.Sprintf("%.2f%%", *cpu/cpuMax*100)
+		return fmt.Sprintf("%.2f%%  -- %s --", *cpu/cpuMax*100, loadAverage())
 	}
 	if !variable.IsWin {
 		if homepage.Coreutils[s] {
@@ -159,7 +186,17 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 	return homepage.Components[s]
 }
 
-//func cpuTemperature() (C string) {
+func loadAverage() (_ string) {
+	text := execve.Args("", []string{"uptime"})
+	vals := strings.Split(text, ",")
+	if len(vals) <= 4 {
+		return
+	}
+	return fmt.Sprintf("LOAD AVERAGE:%s/1m,%s/10m,%s/15m",
+		strings.TrimPrefix(vals[2], "  load average:"), vals[3], vals[4])
+}
+
+// func cpuTemperature() (C string) {
 //	output, _ := exec.Command("sensors").Output()
 //	if len(output) == 0 {
 //		output, _ = exec.Command("vcgencmd", "measure_temp").Output()
@@ -196,7 +233,7 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 //		return strings.Join([]string{"\u001B[1;37;41m ", C, " \u001B[0m"}, "")
 //	}
 //	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
-//}
+// }
 
 const javaTag = "J/"
 

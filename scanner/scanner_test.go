@@ -9,18 +9,14 @@ import (
 func Test(t *testing.T) {
 	output := ""
 	processes := Processes()
-	for i, proc := range processes {
-		if proc.Process == nil {
+	for i := range processes {
+		if processes[i] == nil {
 			continue
 		}
-		cmdline, _ := proc.Process.Cmdline()
-		ppid, _ := proc.Process.Ppid()
-		output += fmt.Sprintf("%3d) %5d %5d %32s CMD %s\n",
+		output += fmt.Sprintf("%3d) %32s CMD %s\n",
 			i+1,
-			ppid,
-			proc.Process.Pid,
-			proc.Name,
-			cmdline,
+			processes[i].Name,
+			processes[i].Commandline,
 		)
 	}
 	_ = os.WriteFile("process.txt", []byte(output), 0666)
