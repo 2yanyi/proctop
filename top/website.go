@@ -1,7 +1,7 @@
-package homepage
+package top
 
 var Components = map[string]string{
-	"proctop": "https://github.com/matsuwin/proctop",
+	// "proctop": "https://github.com/matsuwin/proctop",
 
 	// FreeDesktop Projects
 	"modemmanager":          "https://github.com/freedesktop/modemmanager",

@@ -3,13 +3,11 @@ package top
 import (
 	"bytes"
 	"fmt"
+	"github.com/matsuwin/cat"
 	"github.com/utilgo/execve"
-	"os"
 	"r/colors"
 	"r/data/variable"
-	"r/flagset"
 	"r/scanner"
-	"r/top/homepage"
 	"runtime"
 	"sort"
 	"strings"
@@ -86,16 +84,6 @@ func ignore(proc *scanner.Process) bool {
 	if proc == nil {
 		return true
 	}
-	if *flagset.UserProcess {
-		if proc.MemoryBytes == 0 {
-			return true
-		}
-	}
-	if *flagset.KernelProcess {
-		if !(proc.MemoryBytes == 0) {
-			return true
-		}
-	}
 	return false
 }
 
@@ -107,7 +95,7 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 		if i > limit {
 			break
 		}
-		ioState := fmt.Sprintf("%7s/%s", sizeFormat(float64(proc.FIOReadBytes)), sizeFormat(float64(proc.FIOWriteBytes)))
+		ioState := fmt.Sprintf("%7s/%s", cat.SizeFormat(float64(proc.FIOReadBytes)), cat.SizeFormat(float64(proc.FIOWriteBytes)))
 		_ioState := strings.TrimSpace(ioState)
 		if _ioState == "/" {
 			ioState = ""
@@ -121,13 +109,13 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 		}
 
 		cpu := fmt.Sprintf("%.1f", proc.CPUPercent)
-		buf := fmt.Sprintf("%3d)  %5d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %7s  %s",
-			i,                                     // Num
-			proc.Ppid,                             // PPID
-			proc.Count,                            // count
-			sizeFormat(float64(proc.MemoryBytes)), // Memory
-			nameFormat(proc.Name),                 // Name
-			cpu,                                   // CPU
+		buf := fmt.Sprintf("%3d)  %7d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %7s  %s",
+			i,          // Num
+			proc.Ppid,  // PPID
+			proc.Count, // count
+			cat.SizeFormat(float64(proc.MemoryBytes)), // Memory
+			nameFormat(proc.Name),                     // Name
+			cpu,                                       // CPU
 			proc.NumThreads,
 			proc.NumFDs,
 			ioState,
@@ -149,17 +137,6 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 	return
 }
 
-func sizeFormat(bytes float64) (_ string) {
-	if bytes >= _GB {
-		return fmt.Sprintf("%.1fG", bytes/1024/1024/1024)
-	} else if bytes >= _MB {
-		return fmt.Sprintf("%.1fM", bytes/1024/1024)
-	} else if bytes >= _KB {
-		return fmt.Sprintf("%.1fK", bytes/1024)
-	}
-	return
-}
-
 func nameFormat(s string) string {
 	if strings.HasPrefix(s, javaTag) {
 		return s
@@ -174,74 +151,22 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 	if s == scanner.StatisticsTag {
 		return fmt.Sprintf("%.2f%%  -- %s --", *cpu/cpuMax*100, loadAverage())
 	}
-	if !variable.IsWin {
-		if homepage.Coreutils[s] {
-			return "coreutils"
-		}
-		if homepage.UtilLinux[s] {
-			return "util-linux"
-		}
-	}
-	s = strings.TrimSuffix(s, " >")
-	return homepage.Components[s]
+	return Components[strings.TrimSuffix(s, " >")]
 }
 
 func loadAverage() (_ string) {
 	text := execve.Args("", []string{"uptime"})
-	vals := strings.Split(text, ",")
-	if len(vals) <= 4 {
+	average := strings.Split(text, "load average:")
+	if len(average) != 2 {
 		return
 	}
-	return fmt.Sprintf("LOAD AVERAGE:%s/1m,%s/10m,%s/15m",
-		strings.TrimPrefix(vals[2], "  load average:"), vals[3], vals[4])
+	values := strings.Split(average[1], ",")
+	if len(values) != 3 {
+		return
+	}
+	return fmt.Sprintf("LOAD AVERAGE:%s/1m,%s/10m,%s/15m", values[0], values[1], values[2])
 }
-
-// func cpuTemperature() (C string) {
-//	output, _ := exec.Command("sensors").Output()
-//	if len(output) == 0 {
-//		output, _ = exec.Command("vcgencmd", "measure_temp").Output()
-//		if len(output) != 0 {
-//			text := strings.TrimSpace(string(output))
-//			i := strings.Index(text, "=")
-//			C = text[i+1:]
-//			if C[0] != '-' {
-//				C = "+" + text[i+1:]
-//			}
-//		} else {
-//			return "(need to install lm_sensors)"
-//		}
-//	} else {
-//		for _, line := range strings.Split(string(output), "\n") {
-//			if strings.HasPrefix(line, "Core") {
-//				values := strings.Fields(line)
-//				if len(values) < 2 {
-//					continue
-//				}
-//				C = values[2]
-//				break
-//			}
-//		}
-//	}
-//	if len(C) <= 1 {
-//		return
-//	}
-//	N := C[1]
-//	switch {
-//	case N >= '5':
-//		return strings.Join([]string{"\u001B[1;31;47m ", C, " \u001B[0m"}, "")
-//	case N >= '7':
-//		return strings.Join([]string{"\u001B[1;37;41m ", C, " \u001B[0m"}, "")
-//	}
-//	return strings.Join([]string{"\u001B[1;34;47m ", C, " \u001B[0m"}, "")
-// }
 
 const javaTag = "J/"
 
-const (
-	_KB = 1024
-	_MB = 1024 * 1024
-	_GB = 1024 * 1024 * 1024
-)
-
 var cpuMax = float64(runtime.NumCPU() * 100)
-var ProcessId = int32(os.Getpid())

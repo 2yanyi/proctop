@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"github.com/shirou/gopsutil/v3/process"
+	"strings"
 )
 
 const StatisticsTag = "[statistics]"
@@ -55,13 +56,7 @@ func processInfo(proc *process.Process) *Process {
 	// Status
 	status, _ := proc.StatusWithContext(nil)
 	if len(status) != 0 {
-		if len(status) == 1 {
-			it.Status = status[0]
-		} else {
-			for i := range status {
-				it.Status += status[i] + ","
-			}
-		}
+		it.Status = strings.Join(status, ",")
 	}
 
 	// FIO
