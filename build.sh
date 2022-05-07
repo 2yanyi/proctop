@@ -19,12 +19,7 @@ if [[ $1 == "dist" ]]; then
 
     # linux/amd64
     GOOS=linux GOARCH=amd64 go build -ldflags '-linkmode "external" -extldflags "-static" -X main.BuildID='${version} -o proctop main.go
-    tar -cf - proctop | pigz > bin/elf.x64-proctop.tar.gz
-
-    # linux/arm (Raspberry Pi)
-    GOOS=linux GOARCH=arm go build -ldflags '-X main.BuildID='${version} -o proctop main.go
-    tar -cf - proctop | pigz > bin/elf.arm-proctop.tar.gz
-
+    tar -cf - proctop | pigz > dist/elf.x64-proctop.tar.gz
     rm -f proctop
 
 else

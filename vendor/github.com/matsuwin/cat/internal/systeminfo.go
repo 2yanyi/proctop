@@ -1,10 +1,8 @@
 package internal
 
 import (
-	"fmt"
-	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/jaypipes/ghw"
 	"github.com/shirou/gopsutil/v3/host"
-	"github.com/shirou/gopsutil/v3/mem"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -15,15 +13,17 @@ type Environment struct {
 	Name       string   `json:"name"`
 	Perf       string   `json:"perf"`
 	Processor  string   `json:"processor"`
+	Graphics   string   `json:"graphics,omitempty"`
 	Platform   string   `json:"platform"`
 	Kernel     string   `json:"kernel"`
 	Init       string   `json:"init,omitempty"`
-	LanAddress []string `json:"lanAddress"`
+	LanAddress []string `json:"lanAddress,omitempty"`
 }
 
 func SystemInfo() *Environment {
 	it := &Environment{}
 	it.Perf, it.Processor = cpuTitle()
+	it.Graphics = strings.Join(graphics(), ", ")
 	it.Vendor = vendor()
 	stat, _ := host.Info()
 	if stat == nil {
@@ -55,19 +55,6 @@ func SystemInfo() *Environment {
 	return it
 }
 
-func cpuTitle() (perf, processor string) {
-	stat, _ := cpu.Info()
-	if len(stat) != 0 {
-		perf = fmt.Sprintf("Hertz(%.2fG).T%d", stat[0].Mhz/1000, runtime.NumCPU())
-		processor = strings.TrimSpace(stat[0].ModelName)
-		info, _ := mem.VirtualMemory()
-		if info != nil {
-			perf += fmt.Sprintf(" Memory(%s)", SizeFormat(float64(info.Total)))
-		}
-	}
-	return
-}
-
 func release() string {
 	var name, version string
 	for _, elem := range strings.Split(String("/etc/os-release"), "\n") {
@@ -79,4 +66,41 @@ func release() string {
 		}
 	}
 	return strings.Join([]string{name, version}, " ")
+}
+
+func vendor() (_ string) {
+	if product, _ := ghw.Product(); product != nil {
+		return product.Vendor
+	}
+	return
+}
+
+func graphics() []string {
+	drivers := make([]string, 0)
+	info, err := ghw.GPU()
+	if err != nil {
+		Stderr(err.Error())
+	}
+	if info == nil {
+		return nil
+	}
+	for _, driver := range info.GraphicsCards {
+		if driver == nil {
+			continue
+		}
+		if driver.DeviceInfo == nil {
+			continue
+		}
+		if driver.DeviceInfo.Product == nil {
+			continue
+		}
+		if driver.DeviceInfo.Product.Name == "SVGA II Adapter" {
+			continue
+		}
+		if strings.Contains(driver.DeviceInfo.Product.Name, "Graphics") {
+			continue
+		}
+		drivers = append(drivers, driver.DeviceInfo.Product.Name)
+	}
+	return drivers
 }
