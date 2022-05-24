@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/matsuwin/cat"
-	"github.com/utilgo/execve"
 	"r/colors"
 	"r/data/variable"
 	"r/scanner"
@@ -155,7 +154,7 @@ func websiteFormat(s string, cpu *float64) (_ string) {
 }
 
 func loadAverage() (_ string) {
-	text := execve.Args("", []string{"uptime"})
+	text := cat.CommandArgs("", []string{"uptime"})
 	average := strings.Split(text, "load average:")
 	if len(average) != 2 {
 		return
