@@ -28,7 +28,7 @@ func Processes() []*Process {
 		panic(err)
 	}
 	statistics := &Process{Name: StatisticsTag}
-	for i := range processes {
+	for i := 0; i < len(processes); i++ {
 		it := processInfo(processes[i])
 		statistics.CPUPercent += it.CPUPercent
 		statistics.MemoryBytes += it.MemoryBytes

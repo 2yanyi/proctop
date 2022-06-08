@@ -8,10 +8,7 @@ import (
 	"time"
 )
 
-const (
-	binary  = "proctop"
-	version = "0.1"
-)
+const binary = "proctop"
 
 var fs = flag.NewFlagSet(binary, flag.ExitOnError)
 var (
@@ -33,7 +30,7 @@ func Init(BuildID string) (_ bool) {
 
 	// 查看程序版本
 	if *__version {
-		fmt.Printf("v%s.%s \n", version, BuildID)
+		fmt.Printf("v%s \n", BuildID)
 		return
 	}
 

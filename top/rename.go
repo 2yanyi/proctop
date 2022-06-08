@@ -212,12 +212,13 @@ func renameJava(name, commandline *string) {
 
 	// Java: JetBrains
 	if strings.Contains(*commandline, "-Didea.vendor.name=") {
-		for i, value := range strings.Split(*commandline, "-Didea.platform.prefix=") {
+		ls := strings.Split(*commandline, "-Didea.platform.prefix=")
+		for i := 0; i < len(ls); i++ {
 			if i == 0 {
 				continue
 			}
 			*name = ""
-			for _, char := range value {
+			for _, char := range ls[i] {
 				if char == ' ' {
 					break
 				}

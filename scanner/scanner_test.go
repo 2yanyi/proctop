@@ -9,7 +9,7 @@ import (
 func Test(t *testing.T) {
 	output := ""
 	processes := Processes()
-	for i := range processes {
+	for i := 0; i < len(processes); i++ {
 		if processes[i] == nil {
 			continue
 		}

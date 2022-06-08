@@ -87,14 +87,14 @@ func ignore(proc *scanner.Process) bool {
 }
 
 func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
-	for i, proc := range processes {
-		if proc == nil {
+	for i := 0; i < len(processes); i++ {
+		if processes[i] == nil {
 			continue
 		}
 		if i > limit {
 			break
 		}
-		ioState := fmt.Sprintf("%7s/%s", cat.SizeFormat(float64(proc.FIOReadBytes)), cat.SizeFormat(float64(proc.FIOWriteBytes)))
+		ioState := fmt.Sprintf("%7s/%s", cat.SizeFormat(float64(processes[i].FIOReadBytes)), cat.SizeFormat(float64(processes[i].FIOWriteBytes)))
 		_ioState := strings.TrimSpace(ioState)
 		if _ioState == "/" {
 			ioState = ""
@@ -107,21 +107,21 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 			}
 		}
 
-		cpu := fmt.Sprintf("%.1f", proc.CPUPercent)
+		cpu := fmt.Sprintf("%.1f", processes[i].CPUPercent)
 		buf := fmt.Sprintf("%3d)  %7d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %7s  %s",
-			i,          // Num
-			proc.Ppid,  // PPID
-			proc.Count, // count
-			cat.SizeFormat(float64(proc.MemoryBytes)), // Memory
-			nameFormat(proc.Name),                     // Name
-			cpu,                                       // CPU
-			proc.NumThreads,
-			proc.NumFDs,
+			i,                  // Num
+			processes[i].Ppid,  // PPID
+			processes[i].Count, // count
+			cat.SizeFormat(float64(processes[i].MemoryBytes)), // Memory
+			nameFormat(processes[i].Name),                     // Name
+			cpu,                                               // CPU
+			processes[i].NumThreads,
+			processes[i].NumFDs,
 			ioState,
-			proc.Status, // status
-			websiteFormat(strings.ToLower(proc.Name), &proc.CPUPercent),
+			processes[i].Status, // status
+			websiteFormat(strings.ToLower(processes[i].Name), &processes[i].CPUPercent),
 		)
-		if proc.Name == scanner.StatisticsTag {
+		if processes[i].Name == scanner.StatisticsTag {
 			page.WriteString(colors.White(buf, colors.Zero) + "\n")
 		} else if cpu == "0.0" {
 			page.WriteString(colors.Blue(buf, colors.Zero) + "\n")
