@@ -21,7 +21,7 @@ func rename(name, commandline *string) {
 	} else {
 		defer func(bak string) {
 			if *name != bak {
-				*name += " >"
+				*name += " +"
 			}
 		}(*name)
 	}
@@ -33,25 +33,72 @@ func rename(name, commandline *string) {
 
 	// Kernel
 	case strings.HasPrefix(*name, "kworker/"):
-		*name = "Kworker"
-	case strings.HasPrefix(*name, "ksoftirqd/"):
-		*name = "Ksoftirqd"
-	case strings.HasPrefix(*name, "irq/"):
-		*name = "Irq"
-	case strings.HasPrefix(*name, "migration/"):
-		*name = "Migration"
-	case strings.HasPrefix(*name, "idle_inject/"):
-		*name = "Idle_inject"
+		*name = "kworker/* (kernel)"
 	case strings.HasPrefix(*name, "cpuhp/"):
-		*name = "Cpuhp"
-	case strings.HasPrefix(*name, "scsi_"):
-		*name = "SCSI"
-	case strings.HasPrefix(*name, "rcu"):
-		*name = "RCU"
+		*name = "cpuhp/* (kernel)"
+	case strings.HasPrefix(*name, "migration/"):
+		*name = "migration/* (kernel)"
+	case strings.HasPrefix(*name, "idle_inject/"):
+		*name = "idle_inject/* (kernel)"
+	case strings.HasPrefix(*name, "irq/"):
+		*name = "irq/* (kernel)"
+	case strings.HasPrefix(*name, "ksoftirqd/"):
+		*name = "ksoftirqd/* (kernel)"
+	case strings.HasPrefix(*name, "kdmflush/"):
+		*name = "kdmflush/* (kernel)"
+	case strings.HasPrefix(*name, "jbd2/"):
+		*name = "jbd2/* (kernel)"
+	case strings.HasPrefix(*name, "scsi_eh_"):
+		*name = "scsi_eh* (kernel)"
+	case strings.HasPrefix(*name, "scsi_tmf_"):
+		*name = "scsi_tmf* (kernel)"
 	case strings.HasPrefix(*name, "card0-"):
-		*name = "card0"
+		*name = "card0-* (kernel)"
+	case strings.HasPrefix(*name, "rcu_"):
+		*name = "rcu_* (kernel)"
+	case *name == "ext4-rsv-conver":
+		*name = "ext4-rsv-conver (kernel)"
+	case
+		strings.HasPrefix(*name, "mpt/"),
+		strings.HasPrefix(*name, "kcryptd/"), strings.HasPrefix(*name, "kcryptd_io/"), strings.HasPrefix(*name, "dmcrypt_write/"),
+		*name == "kthreadd",
+		*name == "kauditd",
+		*name == "kblockd",
+		*name == "kdevtmpfs",
+		*name == "khungtaskd",
+		*name == "kcompactd0",
+		*name == "ksmd",
+		*name == "khugepaged",
+		*name == "kintegrityd",
+		*name == "kswapd0",
+		*name == "kthrotld",
+		*name == "kstrp",
+		*name == "netns",
+		*name == "mm_percpu_wq",
+		*name == "inet_frag_wq",
+		*name == "oom_reaper",
+		*name == "writeback",
+		*name == "blkcg_punt_bio",
+		*name == "tpm_dev_wq",
+		*name == "ata_sff",
+		*name == "md",
+		*name == "edac-poller",
+		*name == "devfreq_wq",
+		*name == "watchdogd",
+		*name == "ecryptfs-kthread",
+		*name == "acpi_thermal_pm",
+		*name == "vfio-irqfd-clea",
+		*name == "mld",
+		*name == "ipv6_addrconf",
+		*name == "zswap-shrink",
+		*name == "charger_manager",
+		*name == "cryptd",
+		*name == "mpt_poll_0",
+		*name == "raid5wq",
+		*name == "ipmi-msghandler":
+		*name = "-- other -- (kernel)"
 
-	// System
+		// System
 	case strings.HasPrefix(*name, "upstart"):
 		*name = "UPStart"
 	case strings.HasPrefix(*name, "indicator"):
@@ -75,7 +122,7 @@ func rename(name, commandline *string) {
 	case strings.HasPrefix(*name, "unity"):
 		*name = "Unity-tools"
 
-	// GNOME
+		// GNOME
 	case strings.HasPrefix(*name, "tracker"),
 		strings.HasPrefix(*name, "gvfs"),
 		strings.HasPrefix(*name, "gdm"),
@@ -92,39 +139,15 @@ func rename(name, commandline *string) {
 			*name = "GNOME"
 		}
 
-	// case strings.HasPrefix(*name, "tracker"):
-	// 	*name = "Tracker"
-	// case strings.HasPrefix(*name, "gvfs"):
-	// 	*name = "Gvfs"
-	// case strings.HasPrefix(*name, "gdm"):
-	// 	*name = "Gdm"
-	// case strings.HasPrefix(*name, "gsd"):
-	// 	*name = "Gsd"
-	// case strings.HasPrefix(*name, "goa"):
-	// 	*name = "Goa"
-	// case strings.HasPrefix(*name, "at-spi"):
-	// 	*name = "AT-spi"
-	// case strings.HasPrefix(*name, "gnome"):
-	// 	{
-	// 		switch *name {
-	// 		case "gnome-terminal", "gnome-terminal.real":
-	// 			*name = "Terminal"
-	// 		case "gnome-disks":
-	// 			*name = "disks"
-	// 		default:
-	// 			*name = "GNOME"
-	// 		}
-	// 	}
-
-	// Database
-	case strings.HasPrefix(*name, "clickhouse"):
-		*name = "ClickHouse"
-	case strings.HasPrefix(*name, "mongo"):
-		*name = "MongoDB"
-	case strings.HasPrefix(*name, "mysql"):
-		*name = "MySQL"
-	case strings.HasPrefix(*name, "redis"):
-		*name = "Redis"
+		// Database
+	// case strings.HasPrefix(*name, "clickhouse"):
+	// 	*name = "ClickHouse"
+	// case strings.HasPrefix(*name, "mongo"):
+	// 	*name = "MongoDB"
+	// case strings.HasPrefix(*name, "mysql"):
+	// 	*name = "MySQL"
+	// case strings.HasPrefix(*name, "redis"):
+	// 	*name = "Redis"
 
 	// Applications
 	case strings.HasPrefix(*name, "chrome"):
@@ -148,7 +171,7 @@ func rename(name, commandline *string) {
 	case *name == "steamwebhelper":
 		*name = "Steam"
 
-	// VM
+		// VM
 	case strings.HasPrefix(*name, "VBox"), *name == "VirtualBoxVM":
 		if *name != "VBoxClient" {
 			*name = "VirtualBoxVM"
@@ -156,7 +179,7 @@ func rename(name, commandline *string) {
 	case *name == "vmtoolsd", *name == "vmware-vmblock-fuse", *name == "vmhgfs-fuse", *name == "VGAuthService":
 		*name = "VMware-tools"
 
-	// Java
+		// Java
 	case *name == "goland64":
 		*name = "J/Goland"
 

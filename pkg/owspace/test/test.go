@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"r/owspace"
+	"r/pkg/owspace"
 	"time"
 )
 

@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"r/data/variable"
 	"r/flagset"
-	"r/owspace"
+	"r/pkg/owspace"
 	"r/title"
 	"r/top"
 	"time"

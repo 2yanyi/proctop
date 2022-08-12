@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/matsuwin/cat"
-	"r/colors"
 	"r/data/variable"
-	"r/scanner"
+	"r/pkg/colors"
+	"r/pkg/scanner"
 	"runtime"
 	"sort"
 	"strings"
@@ -40,7 +40,7 @@ func Call(limit int) string {
 func combineSimilarItem(processes *[]*scanner.Process) {
 	set := make(map[string]*scanner.Process)
 	for _, proc := range *processes {
-		if ignore(proc) {
+		if proc == nil {
 			continue
 		}
 		if !variable.IsWin {
@@ -52,8 +52,10 @@ func combineSimilarItem(processes *[]*scanner.Process) {
 				continue
 			}
 		}
+		if proc.Commandline != "" {
+			// continue
+		}
 		rename(&proc.Name, &proc.Commandline)
-		// if strings.HasSuffix(proc.Name, " >") {continue}
 
 		if elem, has := set[proc.Name]; has {
 			proc.Count += elem.Count
@@ -63,10 +65,11 @@ func combineSimilarItem(processes *[]*scanner.Process) {
 			proc.NumFDs += elem.NumFDs
 			proc.FIOReadBytes += elem.FIOReadBytes
 			proc.FIOWriteBytes += elem.FIOWriteBytes
-			set[proc.Name] = proc
-		} else {
-			set[proc.Name] = proc
+			for key := range elem.Status {
+				proc.Status[key] = 0
+			}
 		}
+		set[proc.Name] = proc
 	}
 	*processes = nil
 	for _, proc := range set {
@@ -77,13 +80,6 @@ func combineSimilarItem(processes *[]*scanner.Process) {
 		}
 		*processes = append(*processes, proc)
 	}
-}
-
-func ignore(proc *scanner.Process) bool {
-	if proc == nil {
-		return true
-	}
-	return false
 }
 
 func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
@@ -108,18 +104,18 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 		}
 
 		cpu := fmt.Sprintf("%.1f", processes[i].CPUPercent)
-		buf := fmt.Sprintf("%3d)  %7d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %7s  %s",
+		buf := fmt.Sprintf("%3d)  %7d  %3d  %7s  %32s  %6s  %3d  %5d  %14s  %2s  %s",
 			i,                  // Num
 			processes[i].Ppid,  // PPID
 			processes[i].Count, // count
 			cat.SizeFormat(float64(processes[i].MemoryBytes)), // Memory
 			nameFormat(processes[i].Name),                     // Name
 			cpu,                                               // CPU
-			processes[i].NumThreads,
-			processes[i].NumFDs,
-			ioState,
-			processes[i].Status, // status
-			websiteFormat(strings.ToLower(processes[i].Name), &processes[i].CPUPercent),
+			processes[i].NumThreads,                           // Thread
+			processes[i].NumFDs,                               // FD
+			ioState,                                           // FIO
+			map2str(processes[i].Status),                      // status
+			websiteFormat(strings.ToLower(processes[i].Name), &processes[i].CPUPercent, processes[i].MemoryBytes),
 		)
 		if processes[i].Name == scanner.StatisticsTag {
 			page.WriteString(colors.White(buf, colors.Zero) + "\n")
@@ -136,6 +132,17 @@ func fillScreen(processes []*scanner.Process, limit int) (page bytes.Buffer) {
 	return
 }
 
+func map2str(data map[string]byte) (r string) {
+	for key := range data {
+		if r == "" {
+			r += key
+		} else {
+			r += "," + key
+		}
+	}
+	return
+}
+
 func nameFormat(s string) string {
 	if strings.HasPrefix(s, javaTag) {
 		return s
@@ -146,11 +153,17 @@ func nameFormat(s string) string {
 	return s
 }
 
-func websiteFormat(s string, cpu *float64) (_ string) {
-	if s == scanner.StatisticsTag {
+func websiteFormat(s string, cpu *float64, memoryBytes uint64) (_ string) {
+	if s == scanner.StatisticsTag && !variable.IsWin {
 		return fmt.Sprintf("%.2f%%  -- %s --", *cpu/cpuMax*100, loadAverage())
 	}
-	return Components[strings.TrimSuffix(s, " >")]
+	num := int(memoryBytes / (1024 * 1024 * 10))
+	if num > 50 {
+		f := float64(num) / 100
+		num = 50
+		return fmt.Sprintf("%s %.1fG", strings.Repeat("·", num), f)
+	}
+	return fmt.Sprintf("%s", strings.Repeat("·", num))
 }
 
 func loadAverage() (_ string) {

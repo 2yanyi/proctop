@@ -3,7 +3,7 @@ package title
 import (
 	"fmt"
 	"github.com/matsuwin/cat"
-	"r/colors"
+	"r/pkg/colors"
 	"strings"
 )
 
